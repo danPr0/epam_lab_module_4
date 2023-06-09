@@ -2,8 +2,6 @@ package com.epam.esm.rest;
 
 
 import com.epam.esm.dto.TagDTO;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
@@ -24,7 +22,7 @@ public class AddGcRequest {
     @NotNull
     private String  name;
     @NotNull
-    public  String  description;
+    private String  description;
     @NotNull
     private Double  price;
     @NotNull

@@ -17,10 +17,8 @@ import java.util.List;
 @Setter
 public class UpdateGcRequest {
 
-    @NotNull
-    private Long    id;
     private String  name;
-    public  String  description;
+    private String  description;
     private Double  price;
     private Integer duration;
 

@@ -2,78 +2,54 @@ package com.epam.esm.repository_impl;
 
 import com.epam.esm.entity.Tag;
 import com.epam.esm.repository.TagRepository;
-import com.epam.esm.util_repository.DbFields;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataAccessException;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.RowMapper;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.Query;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
-import javax.sql.DataSource;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.List;
 import java.util.Optional;
 
 /**
- * Implementation of DAO Interface {@link com.epam.esm.repository.TagRepository}.
+ * Implementation of DAO Interface {@link TagRepository}.
  *
  * @author Danylo Proshyn
  */
 
 @Repository
+@Transactional
 public class TagRepositoryImpl implements TagRepository {
 
-    private final JdbcTemplate jdbcTemplate;
-
-    @Autowired
-    public TagRepositoryImpl(DataSource dataSource) {
-
-        jdbcTemplate = new JdbcTemplate(dataSource);
-    }
+    @PersistenceContext
+    private EntityManager em;
 
     @Override
     public void insertEntity(Tag tag) {
 
-        jdbcTemplate.update("insert into tags values (?, ?)", tag.getId(), tag.getName());
+        em.persist(tag);
     }
 
     @Override
     public Optional<Tag> getEntity(Long id) {
 
-        Optional<Tag> result;
-        try {
-            result = Optional.ofNullable(
-                    jdbcTemplate.queryForObject("select * from tags where id = ?", new TagRowMapper(), id));
-        } catch (DataAccessException e) {
-            result = Optional.empty();
-        }
-
-        return result;
+        return Optional.ofNullable(em.find(Tag.class, id));
     }
 
     @Override
-    public int deleteEntity(Long id) {
+    public Optional<Tag> getMostPopularEntity(Long userId) {
 
-        return jdbcTemplate.update("delete from tags where id = ?", id);
+        Query query = em.createNativeQuery(
+                "select * from tags inner join gift_certificates_tags on tags.id = gift_certificates_tags.tag_id inner " +
+                        "join orders on gift_certificates_tags.gc_id = orders.gc_id where user_id = :userId group by " +
+                        "tag_id order by sum(cost) desc limit 1", Tag.class);
+        query.setParameter("userId", userId);
+
+        return Optional.ofNullable((Tag) query.getSingleResult());
     }
 
     @Override
-    public List<Tag> getAllByGiftCertificate(Long giftCertificateId) {
+    public void deleteEntity(Long id) {
 
-        List<Long> tagIds =
-                jdbcTemplate.queryForList("select * from gift_certificates_tags where gc_id = ?", giftCertificateId)
-                        .stream().map(m -> (Long) m.get(DbFields.GIFT_CERTIFICATES_TAGS_TAG_ID)).toList();
-
-        return tagIds.stream().map(id -> getEntity(id).get()).toList();
-    }
-
-    private static class TagRowMapper implements RowMapper<Tag> {
-
-        @Override
-        public Tag mapRow(ResultSet rs, int rowNum) throws SQLException {
-
-            return Tag.builder().id(rs.getLong(DbFields.TAG_ID)).name(rs.getString(DbFields.TAG_NAME)).build();
-        }
+        em.remove(em.find(Tag.class, id));
     }
 }

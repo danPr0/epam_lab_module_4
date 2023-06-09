@@ -14,7 +14,7 @@ import org.springframework.stereotype.Service;
 import java.util.Optional;
 
 /**
- * Implementation of service interface {@link com.epam.esm.service.TagService}.
+ * Implementation of service interface {@link TagService}.
  *
  * @author Danylo Proshyn
  */
@@ -55,8 +55,22 @@ public class TagServiceImpl implements TagService {
     }
 
     @Override
+    public Optional<TagDTO> getMostPopularUserTag(long userId) {
+
+        return tagRepository.getMostPopularEntity(userId).map(DTOUtil::convertToDTO);
+    }
+
+    @Override
     public boolean deleteTag(long id) {
 
-        return tagRepository.deleteEntity(id) != 0;
+        try {
+            tagRepository.deleteEntity(id);
+        } catch (Exception e) {
+            logger.error(e);
+
+            return false;
+        }
+
+        return true;
     }
 }

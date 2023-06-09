@@ -1,5 +1,5 @@
-rootProject.name = 'module2'
+rootProject.name = 'module3'
+
 include 'web_layer'
 include 'repository_layer'
 include 'service_layer'
-

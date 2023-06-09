@@ -5,7 +5,7 @@ import com.epam.esm.dto.TagDTO;
 import java.util.Optional;
 
 /**
- * Service class for {@link com.epam.esm.dto.TagDTO}.
+ * Service class for {@link TagDTO}.
  *
  * @author Danylo Proshyn
  */
@@ -15,6 +15,8 @@ public interface TagService {
     boolean addTag(TagDTO tag);
 
     Optional<TagDTO> getTag(long id);
+
+    Optional<TagDTO> getMostPopularUserTag(long userId);
 
     boolean deleteTag(long id);
 }

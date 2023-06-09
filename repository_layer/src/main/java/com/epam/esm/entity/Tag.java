@@ -1,6 +1,11 @@
 package com.epam.esm.entity;
 
+import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.envers.Audited;
+
+import java.util.List;
+import java.util.Objects;
 
 /**
  * Entity class for "gift_certificates" table.
@@ -8,14 +13,47 @@ import lombok.*;
  * @author Danylo Proshyn
  */
 
+@Entity
+@Table(name = "tags")
+@Audited
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
 @Setter
-@EqualsAndHashCode
 @Builder
 public class Tag {
 
-    private Long   id;
+    @Id
+    @Column(name = "id")
+    private Long id;
+
+    @Column(name = "name")
     private String name;
+
+    @ManyToMany(fetch = FetchType.LAZY, mappedBy = "tags")
+    private List<GiftCertificate> giftCertificates;
+
+    public Tag(Long id, String name) {
+
+        this.id = id;
+        this.name = name;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof Tag tag)) {
+            return false;
+        }
+        return id.equals(tag.id) && name.equals(tag.name) && Objects.equals(giftCertificates, tag.giftCertificates);
+    }
+
+    @Override
+    public int hashCode() {
+
+        return Objects.hash(id, name, giftCertificates);
+    }
 }

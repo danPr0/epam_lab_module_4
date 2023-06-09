@@ -1,6 +1,6 @@
 package com.epam.esm.util_service;
 
-public enum Order {
+public enum SortOrder {
     asc,
     desc
 }

@@ -1,25 +1,25 @@
 package com.epam.esm.dto;
 
-import com.epam.esm.entity.Tag;
+import com.epam.esm.entity.User;
 import lombok.*;
 import org.springframework.hateoas.RepresentationModel;
 import org.springframework.hateoas.server.core.Relation;
 
 /**
- * DTO class for {@link Tag} entity.
+ * DTO class for {@link User} entity.
  *
  * @author Danylo Proshyn
  */
 
-@Relation(collectionRelation = "tags")
+@Relation(collectionRelation = "users")
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
 @Setter
 @EqualsAndHashCode(callSuper = false)
 @Builder
-public class TagDTO extends RepresentationModel<TagDTO> {
+public class UserDTO extends RepresentationModel<TagDTO> {
 
-    private long   id;
-    private String name;
+    private Long id;
+    private String email;
 }

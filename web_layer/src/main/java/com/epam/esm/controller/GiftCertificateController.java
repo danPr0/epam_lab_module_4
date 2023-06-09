@@ -1,25 +1,29 @@
 package com.epam.esm.controller;
 
-import com.epam.esm.dto.GiftCertificateDTO;
-import com.epam.esm.exception.ResourceAlreadyExists;
+import com.epam.esm.dto.TagDTO;
 import com.epam.esm.rest.AddGcRequest;
 import com.epam.esm.rest.UpdateGcRequest;
+import com.epam.esm.dto.GiftCertificateDTO;
+import com.epam.esm.exception.TransactionFailException;
 import com.epam.esm.service.GiftCertificateService;
-import com.epam.esm.service_impl.GiftCertificateServiceImpl;
-import com.epam.esm.util_service.Order;
-import jakarta.validation.Validation;
-import jakarta.validation.ValidationException;
-import jakarta.validation.Validator;
+import com.epam.esm.util_service.SortOrder;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.Resource;
+import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.Link;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Optional;
+
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
 
 /**
  * Controller class responsible for operations with gift certificates.
@@ -29,13 +33,13 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/gift-certificates")
+@Validated
 public class GiftCertificateController {
 
     private final GiftCertificateService gcService;
 
-    private final String    resourceCode = "01";
-    private final Validator validator    = Validation.buildDefaultValidatorFactory().getValidator();
-    private final Logger    logger       = LogManager.getLogger(GiftCertificateController.class);
+    private final String resourceCode = "01";
+    private final Logger logger       = LogManager.getLogger(GiftCertificateController.class);
 
     @Autowired
     public GiftCertificateController(GiftCertificateService gcService) {
@@ -46,84 +50,124 @@ public class GiftCertificateController {
     @GetMapping("/{id}")
     public ResponseEntity<Object> getGiftCertificate(@PathVariable long id) {
 
-        return gcService.getGiftCertificate(id).<ResponseEntity<Object>>map(ResponseEntity::ok).orElseGet(
-                () -> ResponseEntity.status(404)
-                        .body(Map.of("errorMessage", String.format("Requested resource not found (id = %s)", id),
-                                "errorCode", "404" + resourceCode)));
+        Optional<GiftCertificateDTO> gc = gcService.getGiftCertificate(id);
+
+        if (gc.isPresent()) {
+            gc.get().add(linkTo(methodOn(GiftCertificateController.class).getGiftCertificate(id)).withSelfRel());
+            for (TagDTO tag : gc.get().getTags()) {
+                tag.add(linkTo(methodOn(TagController.class).getTag(tag.getId())).withSelfRel());
+            }
+
+            return ResponseEntity.ok(gc.get());
+        } else {
+            return ResponseEntity.status(404)
+                    .body(Map.of("errorMessage", String.format("Requested resource not found (id = %s)", id),
+                            "errorCode", "404" + resourceCode));
+        }
     }
 
     @GetMapping
-    public ResponseEntity<List<GiftCertificateDTO>> getAll(
-            @RequestParam(required = false) Optional<String> tagName,
+    public ResponseEntity<CollectionModel<GiftCertificateDTO>> getAll(
+            @RequestParam(required = false, value = "tagName") Optional<List<String>> tagNames,
             @RequestParam(required = false) Optional<String> namePart,
             @RequestParam(required = false) Optional<String> descriptionPart,
-            @RequestParam(required = false) Optional<List<String>> sort) {
+            @RequestParam(required = false) Optional<List<String>> sort,
+            @RequestParam @Positive Integer page, @RequestParam @Positive Integer total) {
 
-        Optional<Order> nameOrder       = Optional.empty();
-        Optional<Order> createDateOrder = Optional.empty();
+        Optional<SortOrder> nameOrder       = Optional.empty();
+        Optional<SortOrder> createDateOrder = Optional.empty();
 
         if (sort.isPresent()) {
 
             if (sort.get().contains("name_asc")) {
-                nameOrder = Optional.of(Order.asc);
+                nameOrder = Optional.of(SortOrder.asc);
             } else if (sort.get().contains("name_desc")) {
-                nameOrder = Optional.of(Order.desc);
+                nameOrder = Optional.of(SortOrder.desc);
             } else {
                 nameOrder = Optional.empty();
             }
 
             if (sort.get().contains("createDate_asc")) {
-                createDateOrder = Optional.of(Order.asc);
+                createDateOrder = Optional.of(SortOrder.asc);
             } else if (sort.get().contains("createDate_desc")) {
-                createDateOrder = Optional.of(Order.desc);
+                createDateOrder = Optional.of(SortOrder.desc);
             } else {
                 createDateOrder = Optional.empty();
             }
         }
 
-        return ResponseEntity.ok(gcService.getAll(tagName, namePart, descriptionPart, nameOrder, createDateOrder));
+        List<GiftCertificateDTO> giftCertificates =
+                gcService.getAll(page, total, tagNames, namePart, descriptionPart, nameOrder, createDateOrder);
+
+        for (GiftCertificateDTO gc : giftCertificates) {
+            gc.add(linkTo(methodOn(GiftCertificateController.class).getGiftCertificate(gc.getId())).withSelfRel());
+
+            for (TagDTO tag : gc.getTags()) {
+                tag.add(linkTo(methodOn(TagController.class).getTag(tag.getId())).withSelfRel());
+            }
+        }
+
+        Link link = linkTo(GiftCertificateController.class).withSelfRel();
+        return ResponseEntity.ok(CollectionModel.of(giftCertificates, link));
     }
 
     @PostMapping
-    public ResponseEntity<Object> addGiftCertificate(@RequestBody AddGcRequest req) {
-
-        if (validator.validate(req).size() > 0) {
-            throw new ValidationException();
-        }
+    public ResponseEntity<Object> addGiftCertificate(@Valid @RequestBody AddGcRequest req) {
 
         try {
-            gcService.addGiftCertificate(
+            GiftCertificateDTO gc =
                     GiftCertificateDTO.builder().id(req.getId()).name(req.getName()).description(req.getDescription())
-                            .price(req.getPrice()).duration(req.getDuration()).tags(req.getTags()).build());
-        } catch (ResourceAlreadyExists e) {
+                            .price(req.getPrice()).duration(req.getDuration()).tags(req.getTags()).build();
+            gcService.addGiftCertificate(gc);
+            gc.add(linkTo(methodOn(GiftCertificateController.class).getGiftCertificate(gc.getId())).withSelfRel());
+            for (TagDTO tag : gc.getTags()) {
+                tag.add(linkTo(methodOn(TagController.class).getTag(tag.getId())).withSelfRel());
+            }
+
+            return ResponseEntity.status(201).body(gc);
+        } catch (TransactionFailException e) {
             String errorMsg = String.format("Resource already exists (id " + "= %s)", req.getId());
             logger.error(errorMsg);
 
             return ResponseEntity.status(409).body(Map.of("errorMessage", errorMsg, "errorCode", "409" + resourceCode));
         }
-
-        return ResponseEntity.status(201).build();
     }
 
-    @PutMapping()
-    public ResponseEntity<Object> updateGiftCertificate(@RequestBody UpdateGcRequest req) {
-
-        if (validator.validate(req).size() > 0) {
-            throw new ValidationException();
-        }
+    @PatchMapping("/{id}")
+    public ResponseEntity<Object> updateGiftCertificate(
+            @PathVariable long id, @Valid @RequestBody UpdateGcRequest req) {
 
         try {
-            gcService.updateGiftCertificate(
-                    GiftCertificateDTO.builder().id(req.getId()).name(req.getName()).description(req.getDescription())
-                            .price(req.getPrice()).duration(req.getDuration()).tags(req.getTags()).build());
-        } catch (ResourceAlreadyExists e) {
-            String errorMsg = String.format("Resource not found (id = %s)", req.getId());
+            GiftCertificateDTO gc = gcService.getGiftCertificate(id).get();
+            if (req.getName() != null) {
+                gc.setName(req.getName());
+            }
+            if (req.getDescription() != null) {
+                gc.setDescription(req.getDescription());
+            }
+            if (req.getPrice() != null) {
+                gc.setPrice(req.getPrice());
+            }
+            if (req.getDuration() != null) {
+                gc.setDuration(req.getDuration());
+            }
+            if (req.getTags() != null) {
+                gc.setTags(req.getTags());
+            }
+
+            gcService.updateGiftCertificate(gc);
+            gc.add(linkTo(methodOn(GiftCertificateController.class).getGiftCertificate(gc.getId())).withSelfRel());
+            for (TagDTO tag : gc.getTags()) {
+                tag.add(linkTo(methodOn(TagController.class).getTag(tag.getId())).withSelfRel());
+            }
+
+            return ResponseEntity.ok(gc);
+        } catch (NoSuchElementException | TransactionFailException e) {
+            String errorMsg = String.format("Resource not found (id = %s)", id);
             logger.error(errorMsg);
 
             return ResponseEntity.status(404).body(Map.of("errorMessage", errorMsg, "errorCode", "404" + resourceCode));
         }
-
-        return ResponseEntity.ok().build();
     }
 
     @DeleteMapping("/{id}")

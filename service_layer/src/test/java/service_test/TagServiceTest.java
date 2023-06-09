@@ -1,49 +1,38 @@
 package service_test;
 
-import com.epam.esm.config.datasource.DataSourceConfig;
 import com.epam.esm.dto.TagDTO;
 import com.epam.esm.entity.Tag;
 import com.epam.esm.repository.TagRepository;
 import com.epam.esm.repository_impl.TagRepositoryImpl;
+import com.epam.esm.service.TagService;
 import com.epam.esm.service_impl.TagServiceImpl;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.dao.DataAccessException;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = {TagServiceImpl.class, TagRepositoryImpl.class, DataSourceConfig.class})
-@ActiveProfiles("dev")
+@SpringBootTest(classes = {TagServiceImpl.class, TagRepositoryImpl.class})
 public class TagServiceTest extends Mockito {
 
-    @InjectMocks
-    private TagServiceImpl tagService;
+    @Autowired
+    private TagService tagService;
 
-    @Mock
+    @MockBean
     private TagRepository tagRepository;
 
-    private Tag tag1;
-    private Tag tag2;
+    private final Tag tag1;
+    private final Tag tag2;
 
-    private TagDTO tag1DTO;
-    private TagDTO tag2DTO;
+    private final TagDTO tag1DTO;
+    private final TagDTO tag2DTO;
 
-    @BeforeEach
-    public void init() {
-
-        MockitoAnnotations.openMocks(this);
-
+    {
         tag1 = new Tag(1L, "1");
         tag2 = new Tag(2L, "2");
 
@@ -59,7 +48,8 @@ public class TagServiceTest extends Mockito {
         assertTrue(tagService.addTag(tag1DTO));
         verify(tagRepository).insertEntity(tag1);
 
-        doThrow(new DataAccessException("") {}).when(tagRepository).insertEntity(tag2);
+        doThrow(new DataAccessException("") {
+        }).when(tagRepository).insertEntity(tag2);
 
         assertFalse(tagService.addTag(tag2DTO));
         verify(tagRepository).insertEntity(tag2);
@@ -82,12 +72,12 @@ public class TagServiceTest extends Mockito {
     @Test
     public void testDeleteTag() {
 
-        when(tagRepository.deleteEntity(tag1.getId())).thenReturn(1);
+        doNothing().when(tagRepository).deleteEntity(tag1.getId());
 
         assertTrue(tagService.deleteTag(tag1DTO.getId()));
         verify(tagRepository).deleteEntity(tag1.getId());
 
-        when(tagRepository.deleteEntity(tag2.getId())).thenReturn(0);
+        doThrow(IllegalArgumentException.class).when(tagRepository).deleteEntity(tag2.getId());
 
         assertFalse(tagService.deleteTag(tag2DTO.getId()));
         verify(tagRepository).deleteEntity(tag2.getId());

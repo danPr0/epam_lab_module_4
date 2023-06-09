@@ -2,134 +2,105 @@ package com.epam.esm.repository_impl;
 
 import com.epam.esm.entity.GiftCertificate;
 import com.epam.esm.repository.GiftCertificateRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataAccessException;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.RowMapper;
-import org.springframework.jdbc.core.namedparam.BeanPropertySqlParameterSource;
-import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
-import org.springframework.jdbc.core.namedparam.SqlParameterSource;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Root;
+import org.hibernate.query.sqm.TemporalUnit;
+import org.jooq.Record;
+import org.jooq.SelectConditionStep;
+import org.jooq.SortField;
+import org.jooq.SortOrder;
+import org.jooq.conf.ParamType;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
-import javax.sql.DataSource;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.time.LocalDateTime;
+import java.sql.Timestamp;
 import java.util.List;
 import java.util.Optional;
 
-import static com.epam.esm.util_repository.DbFields.*;
+import static org.jooq.impl.DSL.*;
 
 /**
- * Implementation of DAO Interface {@link com.epam.esm.repository.GiftCertificateRepository}.
+ * Implementation of DAO Interface {@link GiftCertificateRepository}.
  *
  * @author Danylo Proshyn
  */
 
 @Repository
+@Transactional
 public class GiftCertificateRepositoryImpl implements GiftCertificateRepository {
 
-    private final JdbcTemplate               jdbcTemplate;
-    private final NamedParameterJdbcTemplate namedParamJdbcTemplate;
-
-    @Autowired
-    public GiftCertificateRepositoryImpl(DataSource dataSource) {
-
-        jdbcTemplate           = new JdbcTemplate(dataSource);
-        namedParamJdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
-    }
+    @PersistenceContext
+    private EntityManager em;
 
     @Override
     public void insertEntity(GiftCertificate gc) {
 
-        jdbcTemplate.update("insert into gift_certificates values (?, ?, ?, ?, ?, ?, ?)", gc.getId(), gc.getName(),
-                gc.getDescription(), gc.getPrice(), gc.getDuration(), gc.getCreateDate(), gc.getLastUpdateDate());
+        em.persist(gc);
     }
 
     @Override
     public Optional<GiftCertificate> getEntity(Long id) {
 
-        Optional<GiftCertificate> result;
-        try {
-            result = Optional.ofNullable(jdbcTemplate.queryForObject("select * from gift_certificates where id = ?",
-                    new GiftCertificateRowMapper(), id));
-        } catch (DataAccessException e) {
-            result = Optional.empty();
-        }
+        return Optional.ofNullable(em.find(GiftCertificate.class, id));
 
-        return result;
     }
 
     @Override
-    public int updateEntity(GiftCertificate gc) {
+    public void updateEntity(GiftCertificate gc) {
 
-        SqlParameterSource namedParameters = new BeanPropertySqlParameterSource(gc);
-
-        return namedParamJdbcTemplate.update("update gift_certificates set name = :name, description = :description," +
-                        "price = :price, duration = :duration, create_date = :createDate, last_update_date = :lastUpdateDate where id = :id",
-                namedParameters);
+        em.merge(gc);
     }
 
     @Override
-    public int deleteEntity(Long id) {
+    public void deleteEntity(Long id) {
 
-        return jdbcTemplate.update("delete from gift_certificates where id = ?", id);
+        em.detach(em.find(GiftCertificateRepository.class, id));
     }
 
     @Override
     public List<GiftCertificate> getAll(
-            Optional<String> tagName, Optional<String> namePart, Optional<String> descriptionPart,
-            Optional<String> nameOrder, Optional<String> createDateOrder) {
+            int page, int total, Optional<List<String>> tagNames, Optional<String> namePart,
+            Optional<String> descriptionPart, Optional<String> nameOrder, Optional<String> createDateOrder) {
 
-        String conditionClause = "where current_date() < timestampadd(day, duration, create_date)";
-        if (tagName.isPresent()) {
-            conditionClause += String.format(" and id in (select gc_id from gift_certificates_tags where tag_id in " +
-                    "(select id from tags where name = '%s'))", tagName.get());
+//        CriteriaBuilder                cb   = em.getCriteriaBuilder();
+//        CriteriaQuery<GiftCertificate> cq   = cb.createQuery(GiftCertificate.class);
+//        Root<GiftCertificate>          root = cq.from(GiftCertificate.class);
+//
+//        cq.select(root).where(cb.lessThan(cb.currentTimestamp(),
+//                cb.function("timestampadd", Timestamp.class, cb.literal(TemporalUnit.DAY), root.get("duration"),
+//                        root.get("createDate"))));
+
+        SelectConditionStep<Record> query = select().from(table("gift_certificates"))
+                .where("current_date() < timestampadd(day, duration, create_date)");
+        if (tagNames.isPresent()) {
+            for (String tagName : tagNames.get()) {
+                query = query.andExists(
+                        select(field("gc_id")).from(table("gift_certificates_tags")).leftJoin(table("tags"))
+                                .on(field("tag_id").eq(field("tags.id")))
+                                .where(field("gift_certificates.id").eq(field("gc_id")))
+                                .and(field("tags.name").eq(tagName)));
+            }
         }
+
         if (namePart.isPresent()) {
-            conditionClause += String.format(" and lower(name) like '%s'", '%' + namePart.get().toLowerCase() + '%');
+            query = query.and(lower(field("name", String.class)).like('%' + namePart.get().toLowerCase() + '%'));
         }
         if (descriptionPart.isPresent()) {
-            conditionClause +=
-                    String.format(" and lower(description) like '%s'", '%' + descriptionPart.get().toLowerCase() + '%');
+            query = query.and(
+                    lower(field("description", String.class)).like('%' + descriptionPart.get().toLowerCase() + '%'));
         }
 
-        String orderClause = "";
-        if (nameOrder.isPresent()) {
-            orderClause = " order by name " + nameOrder.get();
-            if (createDateOrder.isPresent()) {
-                orderClause += ", create_date " + createDateOrder.get();
-            }
-        } else if (createDateOrder.isPresent()) {
-            orderClause = " order by create_date " + createDateOrder.get();
-        }
+        SortField<Object> nameSort =
+                field("name").sort(nameOrder.map(s -> SortOrder.valueOf(s.toUpperCase())).orElse(SortOrder.DEFAULT));
+        SortField<Object> createDateSort = field("create_date").sort(
+                createDateOrder.map(s -> SortOrder.valueOf(s.toUpperCase())).orElse(SortOrder.DEFAULT));
 
-        return jdbcTemplate.query("select * from gift_certificates " + conditionClause + orderClause,
-                new GiftCertificateRowMapper());
-    }
+        String sql = query.orderBy(nameSort, createDateSort).limit(total).offset((page - 1) * total)
+                .getSQL(ParamType.INLINED);
 
-    @Override
-    public void addTagToEntity(Long gcId, Long tagId) {
-
-        jdbcTemplate.update("insert into gift_certificates_tags values (?, ?)", gcId, tagId);
-    }
-
-    @Override
-    public int deleteAllTagsForEntity(Long gcId) {
-
-        return jdbcTemplate.update("delete from gift_certificates_tags where gc_id = ?", gcId);
-    }
-
-    private static class GiftCertificateRowMapper implements RowMapper<GiftCertificate> {
-
-        @Override
-        public GiftCertificate mapRow(ResultSet rs, int rowNum) throws SQLException {
-
-            return GiftCertificate.builder().id(rs.getLong(GIFT_CERTIFICATE_ID))
-                    .name(rs.getString(GIFT_CERTIFICATE_NAME)).description(rs.getString(GIFT_CERTIFICATE_DESCRIPTION))
-                    .price(rs.getDouble(GIFT_CERTIFICATE_PRICE)).duration(rs.getInt(GIFT_CERTIFICATE_DURATION))
-                    .createDate(rs.getObject(GIFT_CERTIFICATE_CREATE_DATE, LocalDateTime.class))
-                    .lastUpdateDate(rs.getObject(GIFT_CERTIFICATE_LAST_UPDATE_DATE, LocalDateTime.class)).build();
-        }
+        return em.createNativeQuery(sql, GiftCertificate.class).getResultList();
     }
 }

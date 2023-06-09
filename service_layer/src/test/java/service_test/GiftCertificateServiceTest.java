@@ -1,27 +1,24 @@
 package service_test;
 
-import com.epam.esm.config.datasource.DataSourceConfig;
 import com.epam.esm.dto.GiftCertificateDTO;
 import com.epam.esm.entity.GiftCertificate;
 import com.epam.esm.entity.Tag;
-import com.epam.esm.exception.ResourceAlreadyExists;
+import com.epam.esm.exception.TransactionFailException;
 import com.epam.esm.repository.GiftCertificateRepository;
 import com.epam.esm.repository.TagRepository;
 import com.epam.esm.repository_impl.GiftCertificateRepositoryImpl;
 import com.epam.esm.repository_impl.TagRepositoryImpl;
+import com.epam.esm.service.GiftCertificateService;
 import com.epam.esm.service_impl.GiftCertificateServiceImpl;
 import com.epam.esm.util_service.DTOUtil;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.dao.DataAccessException;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
@@ -30,18 +27,16 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = {GiftCertificateServiceImpl.class, GiftCertificateRepositoryImpl.class,
-        TagRepositoryImpl.class, DataSourceConfig.class})
-@ActiveProfiles("dev")
+@SpringBootTest(
+        classes = {GiftCertificateServiceImpl.class, GiftCertificateRepositoryImpl.class, TagRepositoryImpl.class})
 public class GiftCertificateServiceTest extends Mockito {
 
-    @InjectMocks
-    private GiftCertificateServiceImpl gcService;
+    @Autowired
+    private GiftCertificateService gcService;
 
-    @Mock
+    @MockBean
     private GiftCertificateRepository gcRepository;
-    @Mock
+    @MockBean
     private TagRepository             tagRepository;
 
     public GiftCertificate gc1;
@@ -50,25 +45,20 @@ public class GiftCertificateServiceTest extends Mockito {
     public GiftCertificateDTO gc1DTO;
     public GiftCertificateDTO gc2DTO;
 
-    private Tag tag1;
-    private Tag tag2;
+    private final Tag tag1;
+    private final Tag tag2;
 
-
-    @BeforeEach
-    public void init() {
-
-        MockitoAnnotations.openMocks(this);
-
+    {
         tag1 = new Tag(1L, "1");
         tag2 = new Tag(2L, "2");
 
         gc1 = new GiftCertificate(1L, "1", "1", 1, 1, LocalDateTime.now().plusMinutes(1).truncatedTo(ChronoUnit.MILLIS),
-                LocalDateTime.MAX.truncatedTo(ChronoUnit.MILLIS));
+                LocalDateTime.MAX.truncatedTo(ChronoUnit.MILLIS), true, List.of(tag1));
         gc2 = new GiftCertificate(2L, "2", "2", 2, 2, LocalDateTime.now().plusMinutes(2).truncatedTo(ChronoUnit.MILLIS),
-                LocalDateTime.MAX.truncatedTo(ChronoUnit.MILLIS));
+                LocalDateTime.MAX.truncatedTo(ChronoUnit.MILLIS), true, List.of(tag2));
 
-        gc1DTO = DTOUtil.convertToDTO(gc1, List.of(tag1));
-        gc2DTO = DTOUtil.convertToDTO(gc2, List.of(tag2));
+        gc1DTO = DTOUtil.convertToDTO(gc1);
+        gc2DTO = DTOUtil.convertToDTO(gc2);
     }
 
     @Test
@@ -82,7 +72,7 @@ public class GiftCertificateServiceTest extends Mockito {
         doThrow(new DataAccessException("") {
         }).when(gcRepository).insertEntity(any());
 
-        assertThrows(ResourceAlreadyExists.class, () -> gcService.addGiftCertificate(gc2DTO));
+        assertThrows(TransactionFailException.class, () -> gcService.addGiftCertificate(gc2DTO));
         verify(gcRepository, times(2)).insertEntity(any());
     }
 
@@ -90,7 +80,6 @@ public class GiftCertificateServiceTest extends Mockito {
     public void testGetGiftCertificate() {
 
         when(gcRepository.getEntity(gc1.getId())).thenReturn(Optional.of(gc1));
-        when(tagRepository.getAllByGiftCertificate(gc1.getId())).thenReturn(List.of(tag1));
 
         assertEquals(Optional.of(gc1DTO), gcService.getGiftCertificate(gc1DTO.getId()));
         verify(gcRepository).getEntity(gc1.getId());
@@ -104,26 +93,24 @@ public class GiftCertificateServiceTest extends Mockito {
     @Test
     public void testUpdateGiftCertificate() {
 
-        when(gcRepository.getEntity(gc1.getId())).thenReturn(Optional.of(gc1));
-
         assertDoesNotThrow(() -> gcService.updateGiftCertificate(gc1DTO));
-        verify(gcRepository).getEntity(gc1.getId());
+        verify(gcRepository).updateEntity(any(GiftCertificate.class));
 
-        when(gcRepository.getEntity(gc2.getId())).thenReturn(Optional.empty());
+        doThrow(IllegalArgumentException.class).when(gcRepository).updateEntity(any(GiftCertificate.class));
 
-        assertThrows(ResourceAlreadyExists.class, () -> gcService.updateGiftCertificate(gc2DTO));
-        verify(gcRepository).getEntity(gc2.getId());
+        assertThrows(TransactionFailException.class, () -> gcService.updateGiftCertificate(gc2DTO));
+        verify(gcRepository, times(2)).updateEntity(any(GiftCertificate.class));
     }
 
     @Test
     public void deleteGiftCertificate() {
 
-        when(gcRepository.deleteEntity(gc1.getId())).thenReturn(1);
+        doNothing().when(gcRepository).deleteEntity(gc1.getId());
 
         assertTrue(gcService.deleteGiftCertificate(gc1DTO.getId()));
         verify(gcRepository).deleteEntity(gc1.getId());
 
-        when(gcRepository.deleteEntity(gc2.getId())).thenReturn(0);
+        doThrow(IllegalArgumentException.class).when(gcRepository).deleteEntity(gc2.getId());
 
         assertFalse(gcService.deleteGiftCertificate(gc2DTO.getId()));
         verify(gcRepository).deleteEntity(gc2.getId());
@@ -132,14 +119,13 @@ public class GiftCertificateServiceTest extends Mockito {
     @Test
     public void testGetAll() {
 
-        when(gcRepository.getAll(Optional.of(tag1.getName()), Optional.empty(), Optional.empty(), Optional.empty(),
-                Optional.empty())).thenReturn(List.of(gc1));
-        when(tagRepository.getAllByGiftCertificate(gc1.getId())).thenReturn(List.of(tag1));
+        when(gcRepository.getAll(1, 500, Optional.of(List.of(tag1.getName())), Optional.empty(), Optional.empty(),
+                Optional.empty(), Optional.empty())).thenReturn(List.of(gc1));
 
         assertEquals(List.of(gc1DTO),
-                gcService.getAll(Optional.of(tag1.getName()), Optional.empty(), Optional.empty(), Optional.empty(),
-                        Optional.empty()));
-        verify(gcRepository).getAll(Optional.of(tag1.getName()), Optional.empty(), Optional.empty(), Optional.empty(),
-                Optional.empty());
+                gcService.getAll(1, 500, Optional.of(List.of(tag1.getName())), Optional.empty(), Optional.empty(),
+                        Optional.empty(), Optional.empty()));
+        verify(gcRepository).getAll(1, 500, Optional.of(List.of(tag1.getName())), Optional.empty(), Optional.empty(),
+                Optional.empty(), Optional.empty());
     }
 }
