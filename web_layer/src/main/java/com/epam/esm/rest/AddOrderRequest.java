@@ -16,6 +16,7 @@ public class AddOrderRequest {
 
     @NotNull
     private Long userId;
+
     @NotNull
     private Long giftCertificateId;
 }

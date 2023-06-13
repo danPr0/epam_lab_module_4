@@ -14,7 +14,7 @@ import java.util.List;
 @Repository
 public interface OrderRepository {
 
-    void insertEntity(Order order);
+    Order insertEntity(Order order);
 
     List<Order> getEntitiesByUser(Long userId);
 }

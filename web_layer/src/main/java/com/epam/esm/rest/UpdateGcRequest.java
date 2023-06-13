@@ -1,7 +1,8 @@
 package com.epam.esm.rest;
 
 import com.epam.esm.dto.TagDTO;
-import jakarta.validation.constraints.NotNull;
+import jakarta.annotation.Nullable;
+import jakarta.validation.constraints.*;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -17,9 +18,14 @@ import java.util.List;
 @Setter
 public class UpdateGcRequest {
 
-    private String  name;
-    private String  description;
-    private Double  price;
+    private String name;
+    private String description;
+
+    @Positive
+    @Digits(integer = 10, fraction = 2)
+    private Double price;
+
+    @Positive
     private Integer duration;
 
     private List<TagDTO> tags;

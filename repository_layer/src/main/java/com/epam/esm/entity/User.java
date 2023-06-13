@@ -15,13 +15,12 @@ import org.hibernate.envers.Audited;
 
 @Entity
 @Table(name = "users")
-@Audited
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
 @Setter
 @Builder
-public class User {
+public class User extends Auditable {
 
     @Id
     @Column(name = "id")

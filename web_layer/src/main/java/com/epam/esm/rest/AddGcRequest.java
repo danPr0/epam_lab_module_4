@@ -2,7 +2,10 @@ package com.epam.esm.rest;
 
 
 import com.epam.esm.dto.TagDTO;
+import jakarta.validation.constraints.Digits;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import lombok.*;
 
 import java.util.List;
@@ -18,15 +21,24 @@ import java.util.List;
 public class AddGcRequest {
 
     @NotNull
-    private Long    id;
+    @Positive
+    private Long id;
+
+    @NotBlank
+    private String name;
+
+    @NotBlank
+    private String description;
+
     @NotNull
-    private String  name;
+    @Positive
+    @Digits(integer = 10, fraction = 2)
+    private Double price;
+
     @NotNull
-    private String  description;
-    @NotNull
-    private Double  price;
-    @NotNull
+    @Positive
     private Integer duration;
 
+    @NotNull
     private List<TagDTO> tags;
 }

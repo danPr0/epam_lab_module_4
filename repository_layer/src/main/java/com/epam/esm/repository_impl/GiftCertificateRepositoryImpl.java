@@ -17,6 +17,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -36,9 +37,11 @@ public class GiftCertificateRepositoryImpl implements GiftCertificateRepository 
     private EntityManager em;
 
     @Override
-    public void insertEntity(GiftCertificate gc) {
+    public GiftCertificate insertEntity(GiftCertificate gc) {
 
         em.persist(gc);
+
+        return em.find(GiftCertificate.class, gc.getId());
     }
 
     @Override
@@ -49,9 +52,11 @@ public class GiftCertificateRepositoryImpl implements GiftCertificateRepository 
     }
 
     @Override
-    public void updateEntity(GiftCertificate gc) {
+    public GiftCertificate updateEntity(GiftCertificate gc) {
 
         em.merge(gc);
+
+        return em.find(GiftCertificate.class, gc.getId());
     }
 
     @Override
@@ -74,7 +79,7 @@ public class GiftCertificateRepositoryImpl implements GiftCertificateRepository 
 //                        root.get("createDate"))));
 
         SelectConditionStep<Record> query = select().from(table("gift_certificates"))
-                .where("current_date() < timestampadd(day, duration, create_date)");
+                .where("current_date() < timestampadd(day, duration, created_date)");
         if (tagNames.isPresent()) {
             for (String tagName : tagNames.get()) {
                 query = query.andExists(
@@ -93,12 +98,13 @@ public class GiftCertificateRepositoryImpl implements GiftCertificateRepository 
                     lower(field("description", String.class)).like('%' + descriptionPart.get().toLowerCase() + '%'));
         }
 
-        SortField<Object> nameSort =
-                field("name").sort(nameOrder.map(s -> SortOrder.valueOf(s.toUpperCase())).orElse(SortOrder.DEFAULT));
-        SortField<Object> createDateSort = field("create_date").sort(
-                createDateOrder.map(s -> SortOrder.valueOf(s.toUpperCase())).orElse(SortOrder.DEFAULT));
+        List<SortField<Object>> sortFieldList = new ArrayList<>();
+        nameOrder.ifPresent(s -> sortFieldList.add(field("name").sort(SortOrder.valueOf(s.toUpperCase()))));
+        createDateOrder.ifPresent(s -> sortFieldList.add(field("created_date").sort(SortOrder.valueOf(s.toUpperCase()))));
+        sortFieldList.add(field("id").sort(SortOrder.ASC));
 
-        String sql = query.orderBy(nameSort, createDateSort).limit(total).offset((page - 1) * total)
+        String sql =
+                query.orderBy(sortFieldList).limit(total).offset((page - 1) * total)
                 .getSQL(ParamType.INLINED);
 
         return em.createNativeQuery(sql, GiftCertificate.class).getResultList();

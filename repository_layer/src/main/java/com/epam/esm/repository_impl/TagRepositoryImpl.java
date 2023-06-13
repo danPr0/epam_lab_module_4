@@ -39,9 +39,11 @@ public class TagRepositoryImpl implements TagRepository {
     public Optional<Tag> getMostPopularEntity(Long userId) {
 
         Query query = em.createNativeQuery(
-                "select * from tags inner join gift_certificates_tags on tags.id = gift_certificates_tags.tag_id inner " +
-                        "join orders on gift_certificates_tags.gc_id = orders.gc_id where user_id = :userId group by " +
-                        "tag_id order by sum(cost) desc limit 1", Tag.class);
+                "select tags.id, tags.name, tags.created_date, tags.last_modified_date from tags " +
+                        "right join gift_certificates_tags on tags.id = gift_certificates_tags.tag_id " +
+                        "right join orders on gift_certificates_tags.gc_id = orders.gc_id " +
+                        "where user_id = :userId group by tag_id order by sum(cost) desc limit 1",
+                Tag.class);
         query.setParameter("userId", userId);
 
         return Optional.ofNullable((Tag) query.getSingleResult());

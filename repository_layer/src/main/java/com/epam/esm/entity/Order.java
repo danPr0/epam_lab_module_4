@@ -2,10 +2,11 @@ package com.epam.esm.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import lombok.experimental.SuperBuilder;
 import org.hibernate.envers.Audited;
 
 import java.io.Serializable;
-import java.sql.Timestamp;
+import java.time.Instant;
 
 /**
  * Entity class for "orders" table.
@@ -16,13 +17,12 @@ import java.sql.Timestamp;
 @Entity
 @Table(name = "orders")
 @IdClass(Order.OrderIdClass.class)
-@Audited
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
 @Setter
-@Builder
-public class Order {
+@SuperBuilder
+public class Order extends Auditable {
 
     @Id
     @ManyToOne
@@ -36,9 +36,6 @@ public class Order {
 
     @Column(name = "cost")
     private Double cost;
-
-    @Column(name = "timestamp")
-    private Timestamp timestamp;
 
     @Data
     @NoArgsConstructor

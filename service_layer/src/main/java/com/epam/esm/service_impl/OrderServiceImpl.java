@@ -12,8 +12,6 @@ import com.epam.esm.service.UserService;
 import com.epam.esm.util_service.DTOUtil;
 import org.springframework.stereotype.Service;
 
-import java.sql.Timestamp;
-import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 
@@ -52,7 +50,7 @@ public class OrderServiceImpl implements OrderService {
 
         if (user.isPresent() && gc.isPresent() && gc.get().isActive()) {
             orderRepository.insertEntity(
-                    new Order(user.get(), gc.get(), gc.get().getPrice(), Timestamp.from(Instant.now())));
+                    new Order(user.get(), gc.get(), gc.get().getPrice()));
 
             gc.get().setActive(false);
             gcRepository.updateEntity(gc.get());

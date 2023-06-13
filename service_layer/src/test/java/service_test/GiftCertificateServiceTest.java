@@ -1,6 +1,7 @@
 package service_test;
 
 import com.epam.esm.dto.GiftCertificateDTO;
+import com.epam.esm.dto.TagDTO;
 import com.epam.esm.entity.GiftCertificate;
 import com.epam.esm.entity.Tag;
 import com.epam.esm.exception.TransactionFailException;
@@ -28,7 +29,7 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest(
-        classes = {GiftCertificateServiceImpl.class, GiftCertificateRepositoryImpl.class, TagRepositoryImpl.class})
+        classes = {GiftCertificateServiceImpl.class, GiftCertificateRepositoryImpl.class})
 public class GiftCertificateServiceTest extends Mockito {
 
     @Autowired
@@ -48,29 +49,40 @@ public class GiftCertificateServiceTest extends Mockito {
     private final Tag tag1;
     private final Tag tag2;
 
+    private final TagDTO tag1DTO;
+    private final TagDTO tag2DTO;
+
     {
         tag1 = new Tag(1L, "1");
         tag2 = new Tag(2L, "2");
 
-        gc1 = new GiftCertificate(1L, "1", "1", 1, 1, LocalDateTime.now().plusMinutes(1).truncatedTo(ChronoUnit.MILLIS),
-                LocalDateTime.MAX.truncatedTo(ChronoUnit.MILLIS), true, List.of(tag1));
-        gc2 = new GiftCertificate(2L, "2", "2", 2, 2, LocalDateTime.now().plusMinutes(2).truncatedTo(ChronoUnit.MILLIS),
-                LocalDateTime.MAX.truncatedTo(ChronoUnit.MILLIS), true, List.of(tag2));
+        tag1DTO = new TagDTO(1L, "1");
+        tag2DTO = new TagDTO(2L, "2");
 
-        gc1DTO = DTOUtil.convertToDTO(gc1);
-        gc2DTO = DTOUtil.convertToDTO(gc2);
+        LocalDateTime createdDate = LocalDateTime.now();
+        LocalDateTime lastModifiedDate = LocalDateTime.now();
+
+        gc1 = new GiftCertificate(1L, "1", "1", 1, 1, true, List.of(tag1));
+        gc1.setCreatedDate(createdDate);
+        gc1.setLastModifiedDate(lastModifiedDate);
+
+        gc2 = new GiftCertificate(2L, "2", "2", 2, 2, true, List.of(tag2));
+        gc2.setCreatedDate(createdDate);
+        gc2.setLastModifiedDate(lastModifiedDate);
+
+        gc1DTO = new GiftCertificateDTO(1L, "1", "1", 1.0, 1, createdDate, lastModifiedDate, List.of(tag1DTO));
+        gc2DTO = new GiftCertificateDTO(2L, "2", "2", 2.0, 2, createdDate, lastModifiedDate, List.of(tag2DTO));
     }
 
     @Test
     public void testAddGiftCertificate() {
 
-        doNothing().when(gcRepository).insertEntity(any());
+        when(gcRepository.insertEntity(any())).thenReturn(gc1);
 
         assertDoesNotThrow(() -> gcService.addGiftCertificate(gc1DTO));
         verify(gcRepository).insertEntity(any());
 
-        doThrow(new DataAccessException("") {
-        }).when(gcRepository).insertEntity(any());
+        doThrow(IllegalArgumentException.class).when(gcRepository).insertEntity(any());
 
         assertThrows(TransactionFailException.class, () -> gcService.addGiftCertificate(gc2DTO));
         verify(gcRepository, times(2)).insertEntity(any());
@@ -93,9 +105,13 @@ public class GiftCertificateServiceTest extends Mockito {
     @Test
     public void testUpdateGiftCertificate() {
 
+        when(gcRepository.updateEntity(any())).thenReturn(gc1);
+        when(gcRepository.getEntity(gc1DTO.getId())).thenReturn(Optional.of(gc1));
+
         assertDoesNotThrow(() -> gcService.updateGiftCertificate(gc1DTO));
         verify(gcRepository).updateEntity(any(GiftCertificate.class));
 
+        when(gcRepository.getEntity(gc2DTO.getId())).thenReturn(Optional.of(gc2));
         doThrow(IllegalArgumentException.class).when(gcRepository).updateEntity(any(GiftCertificate.class));
 
         assertThrows(TransactionFailException.class, () -> gcService.updateGiftCertificate(gc2DTO));

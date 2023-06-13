@@ -13,11 +13,11 @@ import java.util.Optional;
 
 public interface GiftCertificateRepository {
 
-    void insertEntity(GiftCertificate gc);
+    GiftCertificate insertEntity(GiftCertificate gc);
 
     Optional<GiftCertificate> getEntity(Long id);
 
-    void updateEntity(GiftCertificate gc);
+    GiftCertificate updateEntity(GiftCertificate gc);
 
     void deleteEntity(Long id);
 

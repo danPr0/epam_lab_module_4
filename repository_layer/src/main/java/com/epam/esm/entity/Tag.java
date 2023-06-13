@@ -15,13 +15,12 @@ import java.util.Objects;
 
 @Entity
 @Table(name = "tags")
-@Audited
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
 @Setter
 @Builder
-public class Tag {
+public class Tag extends Auditable {
 
     @Id
     @Column(name = "id")

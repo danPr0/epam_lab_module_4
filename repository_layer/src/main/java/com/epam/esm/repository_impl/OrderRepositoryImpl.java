@@ -26,9 +26,11 @@ public class OrderRepositoryImpl implements OrderRepository {
     private EntityManager em;
 
     @Override
-    public void insertEntity(Order order) {
+    public Order insertEntity(Order order) {
 
         em.persist(order);
+
+        return em.find(Order.class, new Order.OrderIdClass(order.getUser(), order.getGiftCertificate()));
     }
 
     @Override

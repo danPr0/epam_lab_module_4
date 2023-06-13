@@ -71,8 +71,8 @@ public class GiftCertificateController {
             @RequestParam(required = false, value = "tagName") Optional<List<String>> tagNames,
             @RequestParam(required = false) Optional<String> namePart,
             @RequestParam(required = false) Optional<String> descriptionPart,
-            @RequestParam(required = false) Optional<List<String>> sort,
-            @RequestParam @Positive Integer page, @RequestParam @Positive Integer total) {
+            @RequestParam(required = false) Optional<List<String>> sort, @RequestParam @Positive Integer page,
+            @RequestParam @Positive Integer total) {
 
         Optional<SortOrder> nameOrder       = Optional.empty();
         Optional<SortOrder> createDateOrder = Optional.empty();
@@ -115,10 +115,10 @@ public class GiftCertificateController {
     public ResponseEntity<Object> addGiftCertificate(@Valid @RequestBody AddGcRequest req) {
 
         try {
-            GiftCertificateDTO gc =
+            GiftCertificateDTO gc = gcService.addGiftCertificate(
                     GiftCertificateDTO.builder().id(req.getId()).name(req.getName()).description(req.getDescription())
-                            .price(req.getPrice()).duration(req.getDuration()).tags(req.getTags()).build();
-            gcService.addGiftCertificate(gc);
+                            .price(req.getPrice()).duration(req.getDuration()).tags(req.getTags()).build());
+
             gc.add(linkTo(methodOn(GiftCertificateController.class).getGiftCertificate(gc.getId())).withSelfRel());
             for (TagDTO tag : gc.getTags()) {
                 tag.add(linkTo(methodOn(TagController.class).getTag(tag.getId())).withSelfRel());
@@ -155,13 +155,13 @@ public class GiftCertificateController {
                 gc.setTags(req.getTags());
             }
 
-            gcService.updateGiftCertificate(gc);
-            gc.add(linkTo(methodOn(GiftCertificateController.class).getGiftCertificate(gc.getId())).withSelfRel());
-            for (TagDTO tag : gc.getTags()) {
+            GiftCertificateDTO updatedGc = gcService.updateGiftCertificate(gc);
+            updatedGc.add(linkTo(methodOn(GiftCertificateController.class).getGiftCertificate(updatedGc.getId())).withSelfRel());
+            for (TagDTO tag : updatedGc.getTags()) {
                 tag.add(linkTo(methodOn(TagController.class).getTag(tag.getId())).withSelfRel());
             }
 
-            return ResponseEntity.ok(gc);
+            return ResponseEntity.ok(updatedGc);
         } catch (NoSuchElementException | TransactionFailException e) {
             String errorMsg = String.format("Resource not found (id = %s)", id);
             logger.error(errorMsg);

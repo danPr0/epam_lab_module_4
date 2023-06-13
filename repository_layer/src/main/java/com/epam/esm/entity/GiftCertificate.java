@@ -2,9 +2,8 @@ package com.epam.esm.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.envers.Audited;
+import lombok.experimental.SuperBuilder;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 
@@ -16,13 +15,12 @@ import java.util.Objects;
 
 @Entity
 @Table(name = "gift_certificates")
-@Audited
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
 @Setter
-@Builder
-public class GiftCertificate {
+@SuperBuilder
+public class GiftCertificate extends Auditable {
 
     @Id
     @Column(name = "id")
@@ -39,12 +37,6 @@ public class GiftCertificate {
 
     @Column(name = "duration")
     private int duration;
-
-    @Column(name = "create_date")
-    private LocalDateTime createDate;
-
-    @Column(name = "last_update_date")
-    private LocalDateTime lastUpdateDate;
 
     @Column(name = "active")
     private boolean isActive;
@@ -65,13 +57,13 @@ public class GiftCertificate {
             return false;
         }
         return Double.compare(that.price, price) == 0 && duration == that.duration && id.equals(that.id) &&
-                name.equals(that.name) && description.equals(that.description) && createDate.equals(that.createDate) &&
-                lastUpdateDate.equals(that.lastUpdateDate) && Objects.equals(tags, that.tags);
+                name.equals(that.name) && description.equals(that.description) && createdDate.equals(that.createdDate) &&
+                lastModifiedDate.equals(that.lastModifiedDate) && Objects.equals(tags, that.tags);
     }
 
     @Override
     public int hashCode() {
 
-        return Objects.hash(id, name, description, price, duration, createDate, lastUpdateDate, tags);
+        return Objects.hash(id, name, description, price, duration, createdDate, lastModifiedDate, tags);
     }
 }

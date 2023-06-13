@@ -9,8 +9,6 @@ import com.epam.esm.entity.Order;
 import com.epam.esm.entity.Tag;
 import com.epam.esm.entity.User;
 
-import java.util.List;
-
 /**
  * Class for converting DTOs to entities and vice versa.
  *
@@ -22,8 +20,8 @@ public class DTOUtil {
     public static GiftCertificateDTO convertToDTO(GiftCertificate gc) {
 
         return GiftCertificateDTO.builder().id(gc.getId()).name(gc.getName()).description(gc.getDescription())
-                .price(gc.getPrice()).duration(gc.getDuration()).createDate(gc.getCreateDate().toString())
-                .lastUpdateDate(gc.getLastUpdateDate().toString())
+                .price(gc.getPrice()).duration(gc.getDuration()).createdDate(gc.getCreatedDate())
+                .lastUpdatedDate(gc.getLastModifiedDate())
                 .tags(gc.getTags().stream().map(DTOUtil::convertToDTO).toList()).build();
     }
 
@@ -40,14 +38,15 @@ public class DTOUtil {
     public static OrderDTO convertToDTO(Order order) {
 
         return OrderDTO.builder().userId(order.getUser().getId()).giftCertificateId(order.getGiftCertificate().getId())
-                .cost(order.getCost()).timestamp(order.getTimestamp()).build();
+                .cost(order.getCost()).timestamp(order.getCreatedDate()).build();
     }
 
     public static GiftCertificate convertToEntity(GiftCertificateDTO gcDTO) {
 
         GiftCertificate result =
                 GiftCertificate.builder().id(gcDTO.getId()).name(gcDTO.getName()).description(gcDTO.getDescription())
-                        .price(gcDTO.getPrice()).duration(gcDTO.getDuration()).build();
+                        .price(gcDTO.getPrice()).duration(gcDTO.getDuration()).createdDate(gcDTO.getCreatedDate())
+                        .lastModifiedDate(gcDTO.getLastUpdatedDate()).build();
         if (gcDTO.getTags() != null) {
             result.setTags(gcDTO.getTags().stream().map(DTOUtil::convertToEntity).toList());
         }

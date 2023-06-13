@@ -18,11 +18,7 @@ dependencies {
 
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-devtools'
-//    implementation 'org.springframework.boot:spring-boot-gradle-plugin'
-
-//    providedRuntime 'org.springframework.boot:spring-boot-starter-tomcat'
-
     implementation 'org.apache.logging.log4j:log4j-core:2.17.1'
 
-//    compileOnly 'jakarta.servlet:jakarta.servlet-api:6.0.0'
+//    providedRuntime 'org.springframework.boot:spring-boot-starter-tomcat'
 }

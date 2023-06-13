@@ -15,11 +15,11 @@ import java.util.Optional;
 
 public interface GiftCertificateService {
 
-    void addGiftCertificate(GiftCertificateDTO gc) throws TransactionFailException;
+    GiftCertificateDTO addGiftCertificate(GiftCertificateDTO gc) throws TransactionFailException;
 
     Optional<GiftCertificateDTO> getGiftCertificate(long id);
 
-    void updateGiftCertificate(GiftCertificateDTO gc) throws TransactionFailException;
+    GiftCertificateDTO updateGiftCertificate(GiftCertificateDTO gc) throws TransactionFailException;
 
     boolean deleteGiftCertificate(long id);
 

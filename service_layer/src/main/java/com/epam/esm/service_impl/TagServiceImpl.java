@@ -5,6 +5,7 @@ import com.epam.esm.entity.Tag;
 import com.epam.esm.repository.TagRepository;
 import com.epam.esm.service.TagService;
 import com.epam.esm.util_service.DTOUtil;
+import jakarta.validation.Valid;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,7 +34,7 @@ public class TagServiceImpl implements TagService {
     }
 
     @Override
-    public boolean addTag(TagDTO tag) {
+    public boolean addTag(@Valid TagDTO tag) {
 
         try {
             tagRepository.insertEntity(DTOUtil.convertToEntity(tag));
@@ -49,9 +50,7 @@ public class TagServiceImpl implements TagService {
     @Override
     public Optional<TagDTO> getTag(long id) {
 
-        Optional<Tag> tag = tagRepository.getEntity(id);
-
-        return tag.map(DTOUtil::convertToDTO);
+        return tagRepository.getEntity(id).map(DTOUtil::convertToDTO);
     }
 
     @Override

@@ -10,6 +10,7 @@ import com.epam.esm.repository.TagRepository;
 import com.epam.esm.service.GiftCertificateService;
 import com.epam.esm.util_service.DTOUtil;
 import com.epam.esm.util_service.SortOrder;
+import jakarta.validation.Valid;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,21 +46,21 @@ public class GiftCertificateServiceImpl implements GiftCertificateService {
     }
 
     @Override
-    @Transactional(isolation = Isolation.REPEATABLE_READ, propagation = Propagation.REQUIRES_NEW,
+    @Transactional(isolation = Isolation.REPEATABLE_READ, propagation = Propagation.REQUIRED,
                    rollbackFor = TransactionFailException.class)
-    public void addGiftCertificate(GiftCertificateDTO gcDTO) throws TransactionFailException {
+    public GiftCertificateDTO addGiftCertificate(@Valid GiftCertificateDTO gcDTO) throws TransactionFailException {
 
         GiftCertificate gc = DTOUtil.convertToEntity(gcDTO);
-        gc.setCreateDate(LocalDateTime.now());
-        gc.setLastUpdateDate(LocalDateTime.now());
-
+        GiftCertificateDTO addedGiftCertificate;
         try {
-            gcRepository.insertEntity(gc);
+            addedGiftCertificate = DTOUtil.convertToDTO(gcRepository.insertEntity(gc));
         } catch (Exception e) {
 //              transactionManager.rollback(TransactionAspectSupport.currentTransactionStatus());
 //              TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
             throw new TransactionFailException();
         }
+
+        return addedGiftCertificate;
     }
 
     @Override
@@ -71,29 +72,30 @@ public class GiftCertificateServiceImpl implements GiftCertificateService {
     }
 
     @Override
-    @Transactional(isolation = Isolation.REPEATABLE_READ, propagation = Propagation.REQUIRES_NEW,
+    @Transactional(isolation = Isolation.REPEATABLE_READ, propagation = Propagation.REQUIRED,
                    rollbackFor = TransactionFailException.class)
-    public void updateGiftCertificate(GiftCertificateDTO gcDTO) throws TransactionFailException {
+    public GiftCertificateDTO updateGiftCertificate(@Valid GiftCertificateDTO gcDTO) throws TransactionFailException {
+
+        GiftCertificateDTO updatedGiftCertificate;
 
         try {
-            GiftCertificate gc = DTOUtil.convertToEntity(gcDTO);
-            gc.setLastUpdateDate(LocalDateTime.now());
+            GiftCertificate oldGc = gcRepository.getEntity(gcDTO.getId()).get();
+            GiftCertificate newGc = DTOUtil.convertToEntity(gcDTO);
+            newGc.setActive(oldGc.isActive());
 
-            List<Tag> tags = new ArrayList<>();
-            for (TagDTO tag : gcDTO.getTags()) {
-                if (tagRepository.getEntity(gc.getId()).isEmpty()) {
-                    Tag tagEntity = DTOUtil.convertToEntity(tag);
-                    tagRepository.insertEntity(tagEntity);
-                    tags.add(tagEntity);
+            for (Tag tag : newGc.getTags()) {
+                if (tagRepository.getEntity(newGc.getId()).isEmpty()) {
+                    tagRepository.insertEntity(tag);
                 }
             }
-//            gc.setTags(tags);
 
-            gcRepository.updateEntity(gc);
+            updatedGiftCertificate = DTOUtil.convertToDTO(gcRepository.updateEntity(newGc));
         } catch (Exception e) {
             e.printStackTrace();
             throw new TransactionFailException();
         }
+
+        return updatedGiftCertificate;
     }
 
     @Override
