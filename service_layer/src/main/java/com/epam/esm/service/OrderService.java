@@ -1,6 +1,8 @@
 package com.epam.esm.service;
 
 import com.epam.esm.dto.OrderDTO;
+import jakarta.validation.Valid;
+import org.springframework.validation.annotation.Validated;
 
 import java.util.List;
 
@@ -12,7 +14,7 @@ import java.util.List;
 
 public interface OrderService {
 
-    List<OrderDTO> getUserOrders(Long userId);
+    List<OrderDTO> getUserOrders(String email, int page, int total);
 
-    boolean addOrder(Long userId, Long gcId);
+    boolean addOrder(@Valid OrderDTO orderDTO);
 }

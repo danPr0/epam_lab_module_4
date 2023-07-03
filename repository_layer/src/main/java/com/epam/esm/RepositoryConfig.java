@@ -1,15 +1,16 @@
 package com.epam.esm;
 
-import com.epam.esm.util_repository.FillTablesUtil;
-import jakarta.annotation.PostConstruct;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.SpringApplication;
+import org.springframework.beans.factory.config.YamlPropertiesFactoryBean;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
+import org.springframework.core.env.PropertiesPropertySource;
+import org.springframework.core.io.support.EncodedResource;
+import org.springframework.core.io.support.PropertySourceFactory;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
+
+import java.util.Objects;
+import java.util.Properties;
 
 /**
  * Base class for configuring data source.
@@ -17,43 +18,24 @@ import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
  * @author Danylo Proshyn
  */
 
-//@Configuration
-//@EnableAutoConfiguration
-//@ComponentScan
-@SpringBootApplication()
+@Configuration
+@EnableAutoConfiguration
 @EnableJpaAuditing
-//@PropertySource("classpath:/datasource-dev.properties")
-@PropertySource("classpath:/datasource-${spring.profiles.active}.properties")
+@PropertySource(value = "classpath:/application-repository-${spring.profiles.active}.yaml",
+                factory = RepositoryConfig.YamlPropertySourceFactory.class)
 public class RepositoryConfig {
 
-/*
-    @Autowired
-    private FillTablesUtil fillTablesUtil;
+    public static class YamlPropertySourceFactory implements PropertySourceFactory {
 
-    public static void main(String[] args) {
-        SpringApplication.run(RepositoryConfig.class, args);
+        @Override
+        public org.springframework.core.env.PropertySource<?> createPropertySource(String name, EncodedResource encodedResource) {
+            YamlPropertiesFactoryBean factory = new YamlPropertiesFactoryBean();
+            factory.setResources(encodedResource.getResource());
+
+            Properties properties = factory.getObject();
+
+            return new PropertiesPropertySource(Objects.requireNonNull(encodedResource.getResource().getFilename()),
+                    Objects.requireNonNull(properties));
+        }
     }
-
-    @PostConstruct
-    private void fillTables() {
-        fillTablesUtil.fillTables();
-    }
-
- */
-
-
-
-    /*
-    @Bean
-    public LocalSessionFactoryBean sessionFactory() {
-        LocalSessionFactoryBean sessionFactory = new LocalSessionFactoryBean();
-
-        Properties hibernateProperties = new Properties();
-        hibernateProperties.setProperty(
-                "org.hibernate.envers.audit_table_suffix", "_AUDIT_LOG");
-        sessionFactory.setHibernateProperties(hibernateProperties);
-
-        return sessionFactory;
-    }
-     */
 }

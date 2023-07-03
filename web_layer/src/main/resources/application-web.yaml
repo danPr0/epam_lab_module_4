@@ -1,0 +1,41 @@
+server:
+  error:
+    path: "/error"
+
+spring:
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: "1039367988334-nkbu8o2m2f8d4li6juk0vmner6jlbev1.apps.googleusercontent.com"
+            client-secret: "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"
+            redirect-uri: "{baseUrl}/oauth2/sign-in/callback/google"
+            scope:
+              - "openid"
+              - "email"
+              - "profile"
+          github:
+            client-id: "98ece16bca00b86ea22c"
+            client-secret: "1e3f0c62cf64f19960c2d4203291c70cf4a50b05"
+            redirect-uri: "{baseUrl}/oauth2/sign-in/callback/github"
+            scope:
+              - "user:email"
+#---
+#spring:
+#  config:
+#    activate:
+#      on-profile: "dev"
+#server:
+#  port: 8080
+#http:
+#  host: "localhost:8080"
+#---
+#spring:
+#  config:
+#    activate:
+#      on-profile: "prod"
+#server:
+#  port: 80
+#http:
+#  host: "3.76.207.37"

@@ -1,6 +1,8 @@
 package com.epam.esm.repository;
 
 import com.epam.esm.entity.User;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 
@@ -10,7 +12,8 @@ import java.util.Optional;
  * @author Danylo Proshyn
  */
 
-public interface UserRepository {
+@Repository
+public interface UserRepository extends JpaRepository<User, Long> {
 
-    Optional<User> getEntity(Long id);
+    Optional<User> findByEmail(String email);
 }

@@ -1,0 +1,23 @@
+spring:
+  mail:
+    host: "smtp.gmail.com"
+    port: 587
+    username: "email.sender.for.dev.purposes@gmail.com"
+    password: "hqlxeocgwajkhypt"
+    properties:
+      mail:
+        smtp:
+          auth: "true"
+          starttls:
+            enable: "true"
+            required: "true"
+
+security:
+  jwt:
+    token:
+      secret-key: "EpamEsmLabModule4DanPro666SecretKey"
+      expire-length-in-sec:
+        access-token: "900"
+        refresh-token: "86400"
+        confirmation-token: "86400"
+        password-token: "86400"

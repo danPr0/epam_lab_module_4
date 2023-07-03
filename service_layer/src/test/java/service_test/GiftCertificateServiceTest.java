@@ -7,29 +7,21 @@ import com.epam.esm.entity.Tag;
 import com.epam.esm.exception.TransactionFailException;
 import com.epam.esm.repository.GiftCertificateRepository;
 import com.epam.esm.repository.TagRepository;
-import com.epam.esm.repository_impl.GiftCertificateRepositoryImpl;
-import com.epam.esm.repository_impl.TagRepositoryImpl;
 import com.epam.esm.service.GiftCertificateService;
 import com.epam.esm.service_impl.GiftCertificateServiceImpl;
-import com.epam.esm.util_service.DTOUtil;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.dao.DataAccessException;
 
 import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@SpringBootTest(
-        classes = {GiftCertificateServiceImpl.class, GiftCertificateRepositoryImpl.class})
+@SpringBootTest(classes = {GiftCertificateServiceImpl.class})
 public class GiftCertificateServiceTest extends Mockito {
 
     @Autowired
@@ -40,11 +32,9 @@ public class GiftCertificateServiceTest extends Mockito {
     @MockBean
     private TagRepository             tagRepository;
 
-    public GiftCertificate gc1;
-    public GiftCertificate gc2;
+    private final GiftCertificate gc;
 
-    public GiftCertificateDTO gc1DTO;
-    public GiftCertificateDTO gc2DTO;
+    private final GiftCertificateDTO gcDTO;
 
     private final Tag tag1;
     private final Tag tag2;
@@ -56,92 +46,115 @@ public class GiftCertificateServiceTest extends Mockito {
         tag1 = new Tag(1L, "1");
         tag2 = new Tag(2L, "2");
 
-        tag1DTO = new TagDTO(1L, "1");
-        tag2DTO = new TagDTO(2L, "2");
+        tag1DTO = new TagDTO("1");
+        tag2DTO = new TagDTO("2");
 
-        LocalDateTime createdDate = LocalDateTime.now();
+        LocalDateTime createdDate      = LocalDateTime.now();
         LocalDateTime lastModifiedDate = LocalDateTime.now();
 
-        gc1 = new GiftCertificate(1L, "1", "1", 1, 1, true, List.of(tag1));
-        gc1.setCreatedDate(createdDate);
-        gc1.setLastModifiedDate(lastModifiedDate);
+        gc = new GiftCertificate(1L, "1", "1", 1, 1, List.of(tag1, tag2));
+        gc.setCreatedDate(createdDate);
+        gc.setLastModifiedDate(lastModifiedDate);
 
-        gc2 = new GiftCertificate(2L, "2", "2", 2, 2, true, List.of(tag2));
-        gc2.setCreatedDate(createdDate);
-        gc2.setLastModifiedDate(lastModifiedDate);
-
-        gc1DTO = new GiftCertificateDTO(1L, "1", "1", 1.0, 1, createdDate, lastModifiedDate, List.of(tag1DTO));
-        gc2DTO = new GiftCertificateDTO(2L, "2", "2", 2.0, 2, createdDate, lastModifiedDate, List.of(tag2DTO));
+        gcDTO = new GiftCertificateDTO(1L, "1", "1", 1.0, 1, createdDate, lastModifiedDate, List.of(tag1DTO, tag2DTO));
     }
 
     @Test
-    public void testAddGiftCertificate() {
+    public void testAddGiftCertificateSuccess() {
 
-        when(gcRepository.insertEntity(any())).thenReturn(gc1);
+        GiftCertificate gcToAdd = gc.clone();
+        gcToAdd.setId(null);
+        gcToAdd.setCreatedDate(null);
+        gcToAdd.setLastModifiedDate(null);
 
-        assertDoesNotThrow(() -> gcService.addGiftCertificate(gc1DTO));
-        verify(gcRepository).insertEntity(any());
+        GiftCertificateDTO gcDTOToAdd = gcDTO.clone();
+        gcDTOToAdd.setId(null);
+        gcDTOToAdd.setCreatedDate(null);
+        gcDTOToAdd.setLastUpdatedDate(null);
 
-        doThrow(IllegalArgumentException.class).when(gcRepository).insertEntity(any());
+        when(tagRepository.findByName(tag1DTO.getName())).thenReturn(Optional.empty());
+        when(tagRepository.save(Tag.builder().name(tag1DTO.getName()).build())).thenReturn(tag1);
+        when(tagRepository.findByName(tag2DTO.getName())).thenReturn(Optional.of(tag2));
+        when(gcRepository.save(gcToAdd)).thenReturn(gc);
 
-        assertThrows(TransactionFailException.class, () -> gcService.addGiftCertificate(gc2DTO));
-        verify(gcRepository, times(2)).insertEntity(any());
+        assertEquals(gcDTO, gcService.addGiftCertificate(gcDTOToAdd));
+        verify(gcRepository).save(gcToAdd);
     }
 
     @Test
-    public void testGetGiftCertificate() {
+    public void testGetGiftCertificateSuccess() {
 
-        when(gcRepository.getEntity(gc1.getId())).thenReturn(Optional.of(gc1));
+        when(gcRepository.findById(gc.getId())).thenReturn(Optional.of(gc));
 
-        assertEquals(Optional.of(gc1DTO), gcService.getGiftCertificate(gc1DTO.getId()));
-        verify(gcRepository).getEntity(gc1.getId());
-
-        when(gcRepository.getEntity(gc2.getId())).thenReturn(Optional.empty());
-
-        assertTrue(gcService.getGiftCertificate(gc2DTO.getId()).isEmpty());
-        verify(gcRepository).getEntity(gc2.getId());
+        assertEquals(Optional.of(gcDTO), gcService.getGiftCertificate(gcDTO.getId()));
+        verify(gcRepository).findById(gc.getId());
     }
 
     @Test
-    public void testUpdateGiftCertificate() {
+    public void testGetGiftCertificateFail() {
 
-        when(gcRepository.updateEntity(any())).thenReturn(gc1);
-        when(gcRepository.getEntity(gc1DTO.getId())).thenReturn(Optional.of(gc1));
+        when(gcRepository.findById(gc.getId())).thenReturn(Optional.empty());
 
-        assertDoesNotThrow(() -> gcService.updateGiftCertificate(gc1DTO));
-        verify(gcRepository).updateEntity(any(GiftCertificate.class));
-
-        when(gcRepository.getEntity(gc2DTO.getId())).thenReturn(Optional.of(gc2));
-        doThrow(IllegalArgumentException.class).when(gcRepository).updateEntity(any(GiftCertificate.class));
-
-        assertThrows(TransactionFailException.class, () -> gcService.updateGiftCertificate(gc2DTO));
-        verify(gcRepository, times(2)).updateEntity(any(GiftCertificate.class));
+        assertEquals(Optional.empty(), gcService.getGiftCertificate(gcDTO.getId()));
+        verify(gcRepository).findById(gc.getId());
     }
 
     @Test
-    public void deleteGiftCertificate() {
+    public void testUpdateGiftCertificateSuccess() {
 
-        doNothing().when(gcRepository).deleteEntity(gc1.getId());
+        GiftCertificate gcToUpdate = gc.clone();
+        gcToUpdate.setLastModifiedDate(null);
 
-        assertTrue(gcService.deleteGiftCertificate(gc1DTO.getId()));
-        verify(gcRepository).deleteEntity(gc1.getId());
+        GiftCertificateDTO gcDTOToUpdate = gcDTO.clone();
+        gcDTOToUpdate.setCreatedDate(null);
+        gcDTOToUpdate.setLastUpdatedDate(null);
 
-        doThrow(IllegalArgumentException.class).when(gcRepository).deleteEntity(gc2.getId());
+        when(gcRepository.findById(gcDTO.getId())).thenReturn(Optional.of(gc));
+        when(tagRepository.findByName(tag1DTO.getName())).thenReturn(Optional.empty());
+        when(tagRepository.save(Tag.builder().name(tag1DTO.getName()).build())).thenReturn(tag1);
+        when(tagRepository.findByName(tag2DTO.getName())).thenReturn(Optional.of(tag2));
+        when(gcRepository.save(gcToUpdate)).thenReturn(gc);
 
-        assertFalse(gcService.deleteGiftCertificate(gc2DTO.getId()));
-        verify(gcRepository).deleteEntity(gc2.getId());
+        assertEquals(gcDTO, assertDoesNotThrow(() -> gcService.updateGiftCertificate(gcDTOToUpdate)));
+        verify(gcRepository).save(gcToUpdate);
+    }
+
+    @Test
+    public void testUpdateGiftCertificateFail() {
+
+        when(gcRepository.findById(gcDTO.getId())).thenReturn(Optional.empty());
+
+        assertThrows(TransactionFailException.class, () -> gcService.updateGiftCertificate(gcDTO));
+    }
+
+    @Test
+    public void deleteGiftCertificateSuccess() {
+
+        when(gcRepository.findById(gc.getId())).thenReturn(Optional.of(gc));
+        doNothing().when(gcRepository).deleteById(gc.getId());
+
+        assertTrue(gcService.deleteGiftCertificate(gcDTO.getId()));
+        verify(gcRepository).deleteById(gc.getId());
+    }
+
+    @Test
+    public void deleteGiftCertificateFail() {
+
+        when(gcRepository.findById(gc.getId())).thenReturn(Optional.empty());
+
+        assertFalse(gcService.deleteGiftCertificate(gcDTO.getId()));
     }
 
     @Test
     public void testGetAll() {
 
-        when(gcRepository.getAll(1, 500, Optional.of(List.of(tag1.getName())), Optional.empty(), Optional.empty(),
-                Optional.empty(), Optional.empty())).thenReturn(List.of(gc1));
+        when(gcRepository.getAll(1, 500, Optional.of(List.of(tag1.getName(), tag2.getName())), Optional.empty(),
+                Optional.empty(), Optional.empty(), Optional.empty())).thenReturn(List.of(gc));
 
-        assertEquals(List.of(gc1DTO),
-                gcService.getAll(1, 500, Optional.of(List.of(tag1.getName())), Optional.empty(), Optional.empty(),
-                        Optional.empty(), Optional.empty()));
-        verify(gcRepository).getAll(1, 500, Optional.of(List.of(tag1.getName())), Optional.empty(), Optional.empty(),
-                Optional.empty(), Optional.empty());
+        assertEquals(List.of(gcDTO),
+                gcService.getAll(1, 500, Optional.of(List.of(tag1.getName(), tag2.getName())), Optional.empty(),
+                        Optional.empty(), Optional.empty(), Optional.empty()));
+        verify(gcRepository).getAll(1, 500, Optional.of(List.of(tag1.getName(), tag2.getName())), Optional.empty(),
+                Optional.empty(), Optional.empty(), Optional.empty());
     }
 }

@@ -3,7 +3,6 @@ package service_test;
 import com.epam.esm.dto.TagDTO;
 import com.epam.esm.entity.Tag;
 import com.epam.esm.repository.TagRepository;
-import com.epam.esm.repository_impl.TagRepositoryImpl;
 import com.epam.esm.service.TagService;
 import com.epam.esm.service_impl.TagServiceImpl;
 import org.junit.jupiter.api.Test;
@@ -11,13 +10,12 @@ import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.dao.DataAccessException;
 
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@SpringBootTest(classes = {TagServiceImpl.class, TagRepositoryImpl.class})
+@SpringBootTest(classes = {TagServiceImpl.class})
 public class TagServiceTest extends Mockito {
 
     @Autowired
@@ -26,76 +24,78 @@ public class TagServiceTest extends Mockito {
     @MockBean
     private TagRepository tagRepository;
 
-    private final Tag tag1;
-    private final Tag tag2;
+    private final Tag tag = Tag.builder().name("1").build();
 
-    private final TagDTO tag1DTO;
-    private final TagDTO tag2DTO;
+    private final TagDTO tagDTO = new TagDTO("1");
 
-    {
-        tag1 = new Tag(1L, "1");
-        tag2 = new Tag(2L, "2");
+    @Test
+    public void testAddTagSuccess() {
 
-        tag1DTO = new TagDTO(1L, "1");
-        tag2DTO = new TagDTO(2L, "2");
+        when(tagRepository.findByName(tagDTO.getName())).thenReturn(Optional.empty());
+        when(tagRepository.save(tag)).thenReturn(tag);
+
+        assertTrue(tagService.addTag(tagDTO));
+        verify(tagRepository).save(tag);
     }
 
     @Test
-    public void testAddTag() {
+    public void testAddTagFail() {
 
-        doNothing().when(tagRepository).insertEntity(tag1);
+        when(tagRepository.findByName(tagDTO.getName())).thenReturn(Optional.of(tag));
 
-        assertTrue(tagService.addTag(tag1DTO));
-        verify(tagRepository).insertEntity(tag1);
-
-        doThrow(new DataAccessException("") {
-        }).when(tagRepository).insertEntity(tag2);
-
-        assertFalse(tagService.addTag(tag2DTO));
-        verify(tagRepository).insertEntity(tag2);
+        assertFalse(tagService.addTag(tagDTO));
     }
 
     @Test
-    public void testGetTag() {
+    public void testGetTagSuccess() {
 
-        when(tagRepository.getEntity(tag1.getId())).thenReturn(Optional.of(tag1));
+        when(tagRepository.findByName(tagDTO.getName())).thenReturn(Optional.of(tag));
 
-        assertEquals(Optional.of(tag1DTO), tagService.getTag(tag1DTO.getId()));
-        verify(tagRepository).getEntity(tag1.getId());
-
-        when(tagRepository.getEntity(tag2.getId())).thenReturn(Optional.empty());
-
-        assertTrue(tagService.getTag(tag2DTO.getId()).isEmpty());
-        verify(tagRepository).getEntity(tag2.getId());
+        assertEquals(Optional.of(tagDTO), tagService.getTag(tagDTO.getName()));
+        verify(tagRepository).findByName(tagDTO.getName());
     }
 
     @Test
-    public void testGetMostPopularTag() {
+    public void testGetTagFail() {
 
-        long userId = 1;
+        when(tagRepository.findByName(tagDTO.getName())).thenReturn(Optional.empty());
 
-        when(tagRepository.getMostPopularEntity(userId)).thenReturn(Optional.of(tag1));
-
-        assertEquals(Optional.of(tag1DTO), tagService.getMostPopularUserTag(tag1DTO.getId()));
-        verify(tagRepository).getMostPopularEntity(userId);
-
-        when(tagRepository.getMostPopularEntity(userId)).thenReturn(Optional.empty());
-
-        assertTrue(tagService.getMostPopularUserTag(tag2DTO.getId()).isEmpty());
-        verify(tagRepository).getMostPopularEntity(userId);
+        assertEquals(Optional.empty(), tagService.getTag(tagDTO.getName()));
+        verify(tagRepository).findByName(tagDTO.getName());
     }
 
     @Test
-    public void testDeleteTag() {
+    public void testComplexQuerySuccess() {
 
-        doNothing().when(tagRepository).deleteEntity(tag1.getId());
+        when(tagRepository.complexJPQLQuery()).thenReturn(Optional.of(tag));
 
-        assertTrue(tagService.deleteTag(tag1DTO.getId()));
-        verify(tagRepository).deleteEntity(tag1.getId());
+        assertEquals(Optional.of(tagDTO), tagService.getMostPopularUserTag());
+        verify(tagRepository).complexJPQLQuery();
+    }
 
-        doThrow(IllegalArgumentException.class).when(tagRepository).deleteEntity(tag2.getId());
+    @Test
+    public void testComplexQueryFail() {
+        when(tagRepository.complexJPQLQuery()).thenReturn(Optional.empty());
 
-        assertFalse(tagService.deleteTag(tag2DTO.getId()));
-        verify(tagRepository).deleteEntity(tag2.getId());
+        assertEquals(Optional.empty(), tagService.getMostPopularUserTag());
+        verify(tagRepository).complexJPQLQuery();
+    }
+
+    @Test
+    public void testDeleteTagSuccess() {
+
+        when(tagRepository.findByName(tagDTO.getName())).thenReturn(Optional.of(tag));
+        doNothing().when(tagRepository).deleteByName(tagDTO.getName());
+
+        assertTrue(tagService.deleteTag(tagDTO.getName()));
+        verify(tagRepository).deleteByName(tagDTO.getName());
+    }
+
+    @Test
+    public void testDeleteTagFail() {
+
+        when(tagRepository.findByName(tagDTO.getName())).thenReturn(Optional.empty());
+
+        assertFalse(tagService.deleteTag(tagDTO.getName()));
     }
 }

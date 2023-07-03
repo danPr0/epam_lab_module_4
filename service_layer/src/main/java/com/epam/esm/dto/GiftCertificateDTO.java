@@ -25,9 +25,8 @@ import java.util.List;
 @Setter
 @EqualsAndHashCode(callSuper = false)
 @Builder
-public class GiftCertificateDTO extends RepresentationModel<GiftCertificateDTO> {
+public class GiftCertificateDTO extends RepresentationModel<GiftCertificateDTO> implements Cloneable {
 
-    @NotNull
     @Positive
     private Long id;
 
@@ -52,4 +51,14 @@ public class GiftCertificateDTO extends RepresentationModel<GiftCertificateDTO> 
 
     @NotNull
     private List<TagDTO> tags;
+
+    @Override
+    public GiftCertificateDTO clone() {
+
+        try {
+            return (GiftCertificateDTO) super.clone();
+        } catch (CloneNotSupportedException e) {
+            throw new AssertionError();
+        }
+    }
 }

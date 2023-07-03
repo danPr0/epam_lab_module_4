@@ -1,94 +1,122 @@
 package service_test;
 
 import com.epam.esm.dto.OrderDTO;
-import com.epam.esm.entity.GiftCertificate;
-import com.epam.esm.entity.Order;
-import com.epam.esm.entity.User;
+import com.epam.esm.entity.*;
 import com.epam.esm.repository.GiftCertificateRepository;
 import com.epam.esm.repository.OrderRepository;
 import com.epam.esm.repository.UserRepository;
-import com.epam.esm.repository_impl.GiftCertificateRepositoryImpl;
-import com.epam.esm.repository_impl.OrderRepositoryImpl;
-import com.epam.esm.repository_impl.UserRepositoryImpl;
 import com.epam.esm.service.OrderService;
 import com.epam.esm.service_impl.OrderServiceImpl;
+import com.epam.esm.util_service.DTOUtil;
+import com.epam.esm.util_service.ProviderName;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 
-import java.sql.Timestamp;
-import java.time.Instant;
 import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@SpringBootTest(classes = {OrderServiceImpl.class, OrderRepositoryImpl.class})
+@SpringBootTest(classes = {OrderServiceImpl.class})
 public class OrderServiceTest extends Mockito {
 
     @Autowired
     private OrderService orderService;
 
     @MockBean
-    private OrderRepository orderRepository;
+    private OrderRepository           orderRepository;
     @MockBean
     private UserRepository            userRepository;
     @MockBean
     private GiftCertificateRepository gcRepository;
 
-    User user1 = new User(1L, "1");
+    private final User user;
 
-    public GiftCertificate gc1 =
-            new GiftCertificate(1L, "1", "1", 1, 1, true, List.of());
-    public GiftCertificate gc2 =
-            new GiftCertificate(2L, "2", "2", 2, 2, true, List.of());
+    private final GiftCertificate gc1;
+    private final GiftCertificate gc2;
 
-    LocalDateTime purchaseTimestamp = LocalDateTime.now();
-    Order order1 = Order.builder().user(user1).giftCertificate(gc1).cost(4.99).createdDate(purchaseTimestamp).build();
-    Order order2 = Order.builder().user(user1).giftCertificate(gc2).cost(4.99).createdDate(purchaseTimestamp).build();
+    private final Order order;
 
-    OrderDTO order1DTO = new OrderDTO(user1.getId(), gc1.getId(), 4.99, purchaseTimestamp);
-    OrderDTO order2DTO = new OrderDTO(user1.getId(), gc2.getId(), 4.99, purchaseTimestamp);
+    private final OrderDTO orderDTO;
+
+    {
+        user = User.builder().id(1L).email("1").password("1").username("1").firstName("1").lastName("1")
+                .provider(Provider.builder().name(ProviderName.LOCAL.name()).build()).build();
+
+        LocalDateTime createdDate      = LocalDateTime.now();
+        LocalDateTime lastModifiedDate = LocalDateTime.now();
+
+        gc1 = new GiftCertificate(1L, "1", "1", 1, 1, List.of());
+        gc1.setCreatedDate(createdDate);
+        gc1.setLastModifiedDate(lastModifiedDate);
+
+        gc2 = new GiftCertificate(2L, "2", "2", 2, 2, List.of());
+        gc2.setCreatedDate(createdDate);
+        gc2.setLastModifiedDate(lastModifiedDate);
+
+        LocalDateTime purchaseTimestamp = LocalDateTime.now();
+
+        order = new Order(1L, user, List.of(gc1, gc2), gc1.getPrice() + gc2.getPrice());
+        order.setCreatedDate(purchaseTimestamp);
+
+        orderDTO = new OrderDTO(1L, order.getCost(), order.getCreatedDate(), DTOUtil.convertToDTO(user),
+                List.of(DTOUtil.convertToDTO(gc1), DTOUtil.convertToDTO(gc2)));
+    }
 
     @Test
     public void testGetUserOrders() {
 
-        when(orderRepository.getEntitiesByUser(user1.getId())).thenReturn(List.of(order1, order2));
+        PageRequest pageRequest = PageRequest.of(0, 1, Sort.by(Sort.Direction.ASC, Order_.createdDate.getName()));
+        when(orderRepository.findAllByUserEmail(user.getEmail(), pageRequest)).thenReturn(new PageImpl<>(List.of(order)));
 
-        assertEquals(List.of(order1DTO, order2DTO), orderService.getUserOrders(user1.getId()));
-        verify(orderRepository).getEntitiesByUser(user1.getId());
+        assertEquals(List.of(orderDTO), orderService.getUserOrders(user.getEmail(), 1, 1));
+        verify(orderRepository).findAllByUserEmail(user.getEmail(), pageRequest);
     }
 
     @Test
-    public void testAddOrder() {
+    public void testAddOrderSuccess() {
 
-        when(userRepository.getEntity(user1.getId())).thenReturn(Optional.of(user1));
-        when(gcRepository.getEntity(gc1.getId())).thenReturn(Optional.of(gc1));
-        when(orderRepository.insertEntity(order1)).thenReturn(order1);
-        when(gcRepository.updateEntity(gc1)).thenReturn(gc1);
+        Order orderToAdd = order.clone();
+        orderToAdd.setId(null);
+        orderToAdd.setCreatedDate(null);
+        orderToAdd.setLastModifiedDate(null);
 
-        assertTrue(orderService.addOrder(user1.getId(), gc1.getId()));
-        assertFalse(gc1.isActive());
-        verify(gcRepository).updateEntity(gc1);
+        OrderDTO orderDTOToAdd = orderDTO.clone();
+        orderDTOToAdd.setId(null);
+        orderDTOToAdd.setCost(null);
+        orderDTOToAdd.setTimestamp(null);
 
-        when(userRepository.getEntity(user1.getId())).thenReturn(Optional.empty());
-        when(gcRepository.getEntity(gc2.getId())).thenReturn(Optional.of(gc2));
+        when(userRepository.findByEmail(user.getEmail())).thenReturn(Optional.of(user));
+        when(gcRepository.findById(gc1.getId())).thenReturn(Optional.of(gc1));
+        when(gcRepository.findById(gc2.getId())).thenReturn(Optional.of(gc2));
+        when(orderRepository.save(orderToAdd)).thenReturn(order);
 
-        assertFalse(orderService.addOrder(user1.getId(), gc2.getId()));
+        assertTrue(orderService.addOrder(orderDTOToAdd));
+        verify(orderRepository).save(orderToAdd);
+    }
 
-        when(userRepository.getEntity(user1.getId())).thenReturn(Optional.of(user1));
-        when(gcRepository.getEntity(gc2.getId())).thenReturn(Optional.empty());
+    @Test
+    public void testAddOrderFailOnEmptyUser() {
 
-        assertFalse(orderService.addOrder(user1.getId(), gc2.getId()));
+        when(userRepository.findByEmail(user.getEmail())).thenReturn(Optional.empty());
 
-        when(userRepository.getEntity(user1.getId())).thenReturn(Optional.of(user1));
-        gc2.setActive(false);
-        when(gcRepository.getEntity(gc2.getId())).thenReturn(Optional.of(gc2));
+        assertFalse(orderService.addOrder(orderDTO));
+    }
 
-        assertFalse(orderService.addOrder(user1.getId(), gc2.getId()));
+    @Test
+    public void testAddOrderFailOnEmptyGiftCertificate() {
+
+        when(userRepository.findByEmail(user.getEmail())).thenReturn(Optional.of(user));
+        when(gcRepository.findById(gc1.getId())).thenReturn(Optional.empty());
+
+        assertFalse(orderService.addOrder(orderDTO));
     }
 }

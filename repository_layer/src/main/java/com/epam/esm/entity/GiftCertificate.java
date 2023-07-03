@@ -20,9 +20,10 @@ import java.util.Objects;
 @Getter
 @Setter
 @SuperBuilder
-public class GiftCertificate extends Auditable {
+public class GiftCertificate extends Auditable implements Cloneable {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private Long id;
 
@@ -38,10 +39,7 @@ public class GiftCertificate extends Auditable {
     @Column(name = "duration")
     private int duration;
 
-    @Column(name = "active")
-    private boolean isActive;
-
-    @ManyToMany(cascade = CascadeType.PERSIST)
+    @ManyToMany
     @JoinTable (name="gift_certificates_tags",
                 joinColumns=@JoinColumn (name="gc_id"),
                 inverseJoinColumns=@JoinColumn(name="tag_id"))
@@ -50,20 +48,25 @@ public class GiftCertificate extends Auditable {
     @Override
     public boolean equals(Object o) {
 
-        if (this == o) {
-            return true;
-        }
-        if (!(o instanceof GiftCertificate that)) {
-            return false;
-        }
-        return Double.compare(that.price, price) == 0 && duration == that.duration && id.equals(that.id) &&
-                name.equals(that.name) && description.equals(that.description) && createdDate.equals(that.createdDate) &&
-                lastModifiedDate.equals(that.lastModifiedDate) && Objects.equals(tags, that.tags);
+        if (this == o) {return true;}
+        if (!(o instanceof GiftCertificate that)) {return false;}
+        return Double.compare(that.price, price) == 0 && duration == that.duration && Objects.equals(id, that.id) &&
+                name.equals(that.name) && description.equals(that.description) && tags.equals(that.tags);
     }
 
     @Override
     public int hashCode() {
 
         return Objects.hash(id, name, description, price, duration, createdDate, lastModifiedDate, tags);
+    }
+
+    @Override
+    public GiftCertificate clone() {
+
+        try {
+            return (GiftCertificate) super.clone();
+        } catch (CloneNotSupportedException e) {
+            throw new AssertionError();
+        }
     }
 }

@@ -1,6 +1,7 @@
 package com.epam.esm.service;
 
 import com.epam.esm.dto.TagDTO;
+import jakarta.validation.Valid;
 
 import java.util.Optional;
 
@@ -12,11 +13,11 @@ import java.util.Optional;
 
 public interface TagService {
 
-    boolean addTag(TagDTO tag);
+    boolean addTag(@Valid TagDTO tag);
 
-    Optional<TagDTO> getTag(long id);
+    Optional<TagDTO> getTag(String name);
 
-    Optional<TagDTO> getMostPopularUserTag(long userId);
+    Optional<TagDTO> getMostPopularUserTag();
 
-    boolean deleteTag(long id);
+    boolean deleteTag(String name);
 }

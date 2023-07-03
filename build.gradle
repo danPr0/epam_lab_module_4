@@ -13,6 +13,30 @@ repositories {
     mavenCentral()
 }
 
+jar {
+    enabled = false
+}
+
+bootJar {
+//    archiveFileName = 'module4-fat.jar' // use to set entire filename
+    archivesBaseName = 'module4'
+    archiveAppendix = ''
+    archiveVersion = ''
+    archiveClassifier = 'fat'
+}
+
+war {
+//    archiveFileName = 'module4-thin.jar' // use to set entire filename
+    archivesBaseName = 'module4'
+    archiveAppendix = ''
+    archiveVersion = ''
+    archiveClassifier = 'thin'
+}
+
+bootWar {
+    enabled = false
+}
+
 dependencies {
     implementation project(':web_layer')
 
@@ -20,5 +44,5 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-devtools'
     implementation 'org.apache.logging.log4j:log4j-core:2.17.1'
 
-//    providedRuntime 'org.springframework.boot:spring-boot-starter-tomcat'
+    providedRuntime 'org.springframework.boot:spring-boot-starter-tomcat'
 }

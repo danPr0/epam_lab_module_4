@@ -24,10 +24,6 @@ import org.springframework.hateoas.server.core.Relation;
 public class TagDTO extends RepresentationModel<TagDTO> {
 
     @NotNull
-    @Positive
-    private Long id;
-
-    @NotNull
     @NotBlank
     private String name;
 }

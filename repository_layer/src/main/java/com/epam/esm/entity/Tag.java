@@ -23,6 +23,7 @@ import java.util.Objects;
 public class Tag extends Auditable {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private Long id;
 
@@ -41,13 +42,10 @@ public class Tag extends Auditable {
     @Override
     public boolean equals(Object o) {
 
-        if (this == o) {
-            return true;
-        }
-        if (!(o instanceof Tag tag)) {
-            return false;
-        }
-        return id.equals(tag.id) && name.equals(tag.name) && Objects.equals(giftCertificates, tag.giftCertificates);
+        if (this == o) {return true;}
+        if (!(o instanceof Tag tag)) {return false;}
+        return Objects.equals(id, tag.id) && name.equals(tag.name) &&
+                Objects.equals(giftCertificates, tag.giftCertificates);
     }
 
     @Override

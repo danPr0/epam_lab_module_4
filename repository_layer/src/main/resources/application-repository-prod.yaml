@@ -1,0 +1,12 @@
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: "jdbc:mysql://prod-module5-database.cuqrmxxgxkij.eu-central-1.rds.amazonaws.com:3306/epam_lab_module_4"
+    username: "module4_app"
+    password: "module4_root"
+  jpa:
+    properties:
+      hibernate:
+        dialect: "org.hibernate.dialect.MySQLDialect"
+    hibernate:
+      ddl-auto: update

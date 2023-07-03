@@ -1,7 +1,9 @@
 package com.epam.esm.dto;
 
 import com.epam.esm.entity.User;
+import com.epam.esm.util_service.ProviderName;
 import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import lombok.*;
@@ -24,10 +26,10 @@ import org.springframework.hateoas.server.core.Relation;
 public class UserDTO extends RepresentationModel<TagDTO> {
 
     @NotNull
-    @Positive
-    private Long id;
-
-    @NotNull
     @Email
     private String email;
+    private String username;
+    private String firstName;
+    private String lastName;
+    private ProviderName provider;
 }
