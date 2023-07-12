@@ -14,7 +14,6 @@ import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -74,7 +73,7 @@ public class OrderServiceTest extends Mockito {
     @Test
     public void testGetUserOrders() {
 
-        PageRequest pageRequest = PageRequest.of(0, 1, Sort.by(Sort.Direction.ASC, Order_.createdDate.getName()));
+        PageRequest pageRequest = PageRequest.of(0, 1, Sort.by(Sort.Direction.ASC, Order_.CREATED_DATE));
         when(orderRepository.findAllByUserEmail(user.getEmail(), pageRequest)).thenReturn(new PageImpl<>(List.of(order)));
 
         assertEquals(List.of(orderDTO), orderService.getUserOrders(user.getEmail(), 1, 1));

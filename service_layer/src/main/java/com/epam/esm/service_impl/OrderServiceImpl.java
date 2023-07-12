@@ -19,7 +19,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
-import java.awt.print.Pageable;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -51,9 +50,9 @@ public class OrderServiceImpl implements OrderService {
     public List<OrderDTO> getUserOrders(String email, int page, int total) {
 
         return orderRepository.findAllByUserEmail(email,
-                                      PageRequest.of(page - 1, total, Sort.by(Sort.Direction.ASC,
-                                              Order_.createdDate.getName()))).getContent().stream()
-                                                                     .map(DTOUtil::convertToDTO).toList();
+                                      PageRequest.of(page - 1, total,
+                                              Sort.by(Sort.Direction.ASC, Order_.CREATED_DATE))).getContent().stream()
+                              .map(DTOUtil::convertToDTO).toList();
     }
 
     @Override
