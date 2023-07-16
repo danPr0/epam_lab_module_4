@@ -10,6 +10,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.security.SecureRandom;
+import java.security.SecureRandomSpi;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -74,9 +76,9 @@ public class FillTablesUtil {
 
     private List<User> insertUsers() {
 
-        Role role = roleRepository.findByName(RoleName.ROLE_USER.name());
-        Provider provider = providerRepository.findByName(ProviderName.LOCAL.name());
-        List<User> users = new ArrayList<>(1000);
+        Role       role     = roleRepository.findByName(RoleName.ROLE_USER.name());
+        Provider   provider = providerRepository.findByName(ProviderName.LOCAL.name());
+        List<User> users    = new ArrayList<>(1000);
         for (int i = 1; i <= 1000; i++) {
             users.add(i - 1, userRepository.save(
                     User.builder().id((long) i).email(i + "@gmail.com")
@@ -90,11 +92,12 @@ public class FillTablesUtil {
 
     private List<GiftCertificate> insertGiftCertificates(List<Tag> tags) {
 
-        List<GiftCertificate> gcList = new ArrayList<>(10000);
-        List<Integer> gcDiscountsPull = List.of(10, 20, 30, 40, 50, 60, 70, 80, 90);
+        List<GiftCertificate> gcList          = new ArrayList<>(10000);
+        List<Integer>         gcDiscountsPull = List.of(10, 20, 30, 40, 50, 60, 70, 80, 90);
         for (int i = 1; i <= 10000; i++) {
-            Random random   = new Random();
-            int    discount = gcDiscountsPull.get(random.nextInt(9));
+            SecureRandom random = new SecureRandom();
+
+            int       discount = gcDiscountsPull.get(random.nextInt(9));
             List<Tag> gcTags   = new ArrayList<>();
             for (int j = 0; j < 10; j++) {
                 gcTags.add(tags.get((i + j - 1) % 1000));

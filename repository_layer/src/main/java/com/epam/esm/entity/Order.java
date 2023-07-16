@@ -53,6 +53,12 @@ public class Order extends Auditable implements Cloneable {
     }
 
     @Override
+    public int hashCode() {
+
+        return Objects.hash(id);
+    }
+
+    @Override
     public Order clone() {
 
         try {
