@@ -9,7 +9,6 @@ phases:
 #      - echo Nothing to do in the pre_build phase...
   build:
     commands:
-      - gradle test
       - gradle build
       - gradle bootJar
       - gradle war
