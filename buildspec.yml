@@ -9,9 +9,7 @@ phases:
 #      - echo Nothing to do in the pre_build phase...
   build:
     commands:
-      - gradle build
-      - gradle bootJar
-      - gradle war
+      - ./gradlew build
 #  post_build:
 #    commands:
 #      - echo Build completed on `date`
