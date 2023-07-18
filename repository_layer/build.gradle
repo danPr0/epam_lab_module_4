@@ -25,6 +25,9 @@ dependencies {
     implementation 'org.hibernate:hibernate-envers:6.1.7.Final'
     implementation 'mysql:mysql-connector-java:8.0.33'
     implementation 'org.jooq:jooq:3.18.4'
+//    implementation 'javax.xml.bind:jaxb-api:2.3.1'
+//    implementation 'org.glassfish.jaxb:jaxb-runtime:2.3.1'
+
 
     compileOnly 'org.projectlombok:lombok:1.18.26'
     annotationProcessor 'org.projectlombok:lombok:1.18.26'
