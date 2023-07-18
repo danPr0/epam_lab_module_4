@@ -3,7 +3,10 @@ plugins {
     id 'war'
     id 'org.springframework.boot' version '3.0.6'
     id 'io.spring.dependency-management' version '1.1.0'
-    id "org.sonarqube" version "4.2.1.3168"
+    id 'org.sonarqube' version '4.2.1.3168'
+    id 'application'
+    id 'jacoco'
+    id 'jacoco-report-aggregation'
 }
 
 group = 'com.example'
@@ -38,6 +41,32 @@ bootWar {
     enabled = false
 }
 
+jacoco {
+    toolVersion = "0.8.9"
+//    applyTo run
+//    reportsDirectory = file("$buildDir/reports")
+//    reportsDirectory = layout.buildDirectory.dir('customJacocoReportDir')
+}
+
+jacocoTestReport {
+    dependsOn test
+    reports {
+        xml.required = true
+        html.required = true
+        csv.required = true
+//        html.outputLocation = layout.buildDirectory.dir('jacocoHtml')
+    }
+}
+
+testCodeCoverageReport {
+    dependsOn test
+    reports {
+        xml.required = true
+        html.required = true
+        csv.required = true
+    }
+}
+
 sonar {
     properties {
         property "sonar.projectKey", "module4"
@@ -53,4 +82,17 @@ dependencies {
     implementation 'org.apache.logging.log4j:log4j-core:2.17.1'
 
     providedRuntime 'org.springframework.boot:spring-boot-starter-tomcat'
+
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+//    finalizedBy jacocoTestReport // use it when you want to create jacoco report after build and test
+}
+
+tasks.named('check') {
+//    dependsOn tasks.named('testCodeCoverageReport', JacocoReport)
+    dependsOn testCodeCoverageReport
 }
