@@ -2,17 +2,23 @@ version: 0.2
 
 phases:
   install:
-    runtime-versions:
-      java: corretto11
-#  pre_build:
-#    commands:
-#      - echo Nothing to do in the pre_build phase...
+    run-as: root
+    commands:
+      - echo This is a installation
+      - wget https://services.gradle.org/distributions/gradle-4.6-all.zip
+      - unzip -d /opt/gradle gradle-4.6-all.zip
+  pre_build:
+    commands:
+      - echo This is a pre build
   build:
     commands:
-      - ./gradlew build
-#  post_build:
-#    commands:
-#      - echo Build completed on `date`
-artifacts:
-  files:
-    - build/libs/module4-thin.war
+      - echo Starting build `date`
+      - echo Current directory is `pwd`
+      - whereis gradle
+      - which gradle
+      - /opt/gradle/gradle-4.6/bin/gradle -version
+      - /opt/gradle/gradle-4.6/bin/gradle clean
+      - /opt/gradle/gradle-4.6/bin/gradle build
+  post_build:
+    commands:
+      - echo Build must be completed
