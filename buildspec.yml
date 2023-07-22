@@ -1,24 +1,20 @@
 version: 0.2
 
 phases:
-  install:
-    run-as: root
-    commands:
-      - echo This is a installation
-      - wget https://services.gradle.org/distributions/gradle-4.6-all.zip
-      - unzip -d /opt/gradle gradle-4.6-all.zip
+#  install:
+#    runtime-versions:
+#      java: corretto11
   pre_build:
-    commands:
-      - echo This is a pre build
+  #    commands:
+  #      - echo Nothing to do in the pre_build phase...
   build:
     commands:
-      - echo Starting build `date`
-      - echo Current directory is `pwd`
-      - whereis gradle
-      - which gradle
-      - /opt/gradle/gradle-4.6/bin/gradle -version
-      - /opt/gradle/gradle-4.6/bin/gradle clean
-      - /opt/gradle/gradle-4.6/bin/gradle build
+      - chmod +x ./gradlew
+      - ./gradlew build
+      - ./gradlew sonar "-Dsonar.token=sqp_cfead217877a2d5bc79dbb0d7e831c21b6a22bd9 -Dsonar.qualitygate.wait=true"
   post_build:
-    commands:
-      - echo Build must be completed
+#    commands:
+#      - echo Build completed on date
+artifacts:
+  files:
+    - build/libs/module4-thin.war
