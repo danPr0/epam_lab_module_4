@@ -1,20 +1,21 @@
 version: 0.2
 
+env:
+  parameter-store:
+    SONAR_PROJECT_KEY: "SonarProjectKey"
+    SONAR_ORG: "SonarOrganization"
+    SONAR_HOST: "SonarHost"
+  secrets-manager:
+    SONAR_TOKEN: prod/sonar:SonarToken
+    ARTIFACT_AUTH_TOKEN: prod/code-artifact:CodeArtifactAuthToken
 phases:
-#  install:
-#    runtime-versions:
-#      java: corretto11
-  pre_build:
-  #    commands:
-  #      - echo Nothing to do in the pre_build phase...
   build:
     commands:
       - chmod +x ./gradlew
       - ./gradlew build
-      - ./gradlew sonar "-Dsonar.token=sqp_cfead217877a2d5bc79dbb0d7e831c21b6a22bd9 -Dsonar.qualitygate.wait=true"
-  post_build:
-#    commands:
-#      - echo Build completed on date
+      - ./gradlew sonar "-Dsonar.projectKey=$SONAR_PROJECT_KEY" "-Dsonar.organization=$SONAR_ORG" "-Dsonar.host.url=$SONAR_HOST" "-Dsonar.token=$SONAR_TOKEN" "-Dsonar.qualitygate.wait=true"
 artifacts:
   files:
-    - build/libs/module4-thin.war
+    - module4-thin.war
+  name: codebuild-artifact
+  base-directory: build/libs

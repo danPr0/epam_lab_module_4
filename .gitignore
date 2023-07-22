@@ -1,8 +1,8 @@
 HELP.md
 
 #Fill tables util
-#service_layer/src/main/java/com/epam/esm/FillTablesConfig.java
-#service_layer/src/main/java/com/epam/esm/util_service/FillTablesUtil.java
+service_layer/src/main/java/com/epam/esm/FillTablesConfig.java
+service_layer/src/main/java/com/epam/esm/util_service/FillTablesUtil.java
 
 #Out directory
 out
