@@ -2,7 +2,7 @@ version: 0.0
 os: linux
 files:
   - source:  build/libs/module4-thin.war
-    destination: tmp/
+    destination: /tmp
 file_exists_behavior: OVERWRITE
 hooks:
   ApplicationStart:
