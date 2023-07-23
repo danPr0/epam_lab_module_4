@@ -16,6 +16,9 @@ phases:
       - ./gradlew sonar "-Dsonar.projectKey=$SONAR_PROJECT_KEY" "-Dsonar.organization=$SONAR_ORG" "-Dsonar.host.url=$SONAR_HOST" "-Dsonar.token=$SONAR_TOKEN" "-Dsonar.qualitygate.wait=true"
 artifacts:
   files:
-    - module4-thin.war
-  name: codebuild-artifact
-  base-directory: build/libs
+    - build/libs/module4-thin.war
+    - appspec.yml
+    - codedeploy-scripts/*
+#  name: codebuild-artifact
+#  discard-paths: yes
+#  base-directory: build/libs

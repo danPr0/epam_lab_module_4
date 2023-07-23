@@ -7,5 +7,7 @@ file_exists_behavior: OVERWRITE
 hooks:
   ApplicationStart:
     - location: codedeploy-scripts/start_script.sh
+      timeout: 5
   ApplicationStop:
     - location: codedeploy-scripts/stop_script.sh
+      timeout: 5
