@@ -1,5 +1,6 @@
 package com.epam.esm.service_impl;
 
+import com.amazonaws.xray.spring.aop.XRayEnabled;
 import com.epam.esm.dto.GiftCertificateDTO;
 import com.epam.esm.entity.GiftCertificate;
 import com.epam.esm.entity.Tag;
@@ -28,6 +29,7 @@ import java.util.Optional;
 
 @Service
 @Validated
+@XRayEnabled
 public class GiftCertificateServiceImpl implements GiftCertificateService {
 
     private final GiftCertificateRepository gcRepository;

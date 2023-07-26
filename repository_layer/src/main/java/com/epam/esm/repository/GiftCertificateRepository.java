@@ -1,5 +1,6 @@
 package com.epam.esm.repository;
 
+import com.amazonaws.xray.spring.aop.XRayEnabled;
 import com.epam.esm.entity.GiftCertificate;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
@@ -11,6 +12,7 @@ import org.springframework.stereotype.Repository;
  */
 
 @Repository
+@XRayEnabled
 public interface GiftCertificateRepository extends JpaRepository<GiftCertificate, Long>, GiftCertificateRepositoryCustom {
 
 }

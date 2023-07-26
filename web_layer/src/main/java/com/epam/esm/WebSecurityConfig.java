@@ -1,5 +1,7 @@
 package com.epam.esm;
 
+import com.amazonaws.xray.jakarta.servlet.AWSXRayServletFilter;
+import com.amazonaws.xray.strategy.jakarta.SegmentNamingStrategy;
 import com.epam.esm.security.exception_handler.AuthEntryPointJwt;
 import com.epam.esm.security.exception_handler.CustomAccessDeniedHandler;
 import com.epam.esm.security.filter.AuthTokenFilter;
@@ -8,6 +10,7 @@ import com.epam.esm.security.oauth2.CustomOidcUserService;
 import com.epam.esm.security.oauth2.OAuth2AuthenticationFailureHandler;
 import com.epam.esm.security.oauth2.OAuth2AuthenticationSuccessHandler;
 import com.epam.esm.service.UserService;
+import jakarta.servlet.Filter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.YamlPropertiesFactoryBean;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -45,6 +48,8 @@ public class WebSecurityConfig {
     private final OAuth2AuthenticationSuccessHandler oAuth2SuccessHandler;
     private final OAuth2AuthenticationFailureHandler oAuth2FailureHandler;
 
+    private final AWSXRayServletFilter awsxRayServletFilter = new AWSXRayServletFilter(SegmentNamingStrategy.dynamic("Scorekeep"));
+
     @Autowired
     public WebSecurityConfig(
             UserService userService, CustomOAuth2UserService oAuth2UserService, CustomOidcUserService oidcUserService,
@@ -68,7 +73,9 @@ public class WebSecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
 
         httpSecurity.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
-                    .addFilterAfter(authTokenFilter, UsernamePasswordAuthenticationFilter.class)
+                    .addFilterAfter(awsxRayServletFilter, UsernamePasswordAuthenticationFilter.class)
+                    .addFilterAfter(authTokenFilter, AWSXRayServletFilter.class)
+//                    .addFilterAfter(authTokenFilter, UsernamePasswordAuthenticationFilter.class)
                     .exceptionHandling().authenticationEntryPoint(authEntryPointJwt).and()
                     .exceptionHandling().accessDeniedHandler(accessDeniedHandler).and()
                     .authorizeHttpRequests()
@@ -105,6 +112,11 @@ public class WebSecurityConfig {
 
         return authenticationManagerBuilder.build();
     }
+
+/*    @Bean
+    public AWSXRayServletFilter tracingFilter() {
+        return new AWSXRayServletFilter(SegmentNamingStrategy.dynamic("Scorekeep"));
+    }*/
 
     public static class YamlPropertySourceFactory implements PropertySourceFactory {
 

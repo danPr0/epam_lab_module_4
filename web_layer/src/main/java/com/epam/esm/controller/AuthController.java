@@ -1,5 +1,7 @@
 package com.epam.esm.controller;
 
+import com.amazonaws.xray.AWSXRay;
+import com.amazonaws.xray.spring.aop.XRayEnabled;
 import com.epam.esm.dto.UserDTO;
 import com.epam.esm.rest.auth_request.SignInRequest;
 import com.epam.esm.rest.auth_request.SignUpRequest;
@@ -23,6 +25,7 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/auth")
+@XRayEnabled
 public class AuthController {
 
     private final UserService               userService;

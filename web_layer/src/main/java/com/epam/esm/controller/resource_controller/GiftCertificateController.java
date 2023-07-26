@@ -1,5 +1,6 @@
 package com.epam.esm.controller.resource_controller;
 
+import com.amazonaws.xray.spring.aop.XRayEnabled;
 import com.epam.esm.dto.TagDTO;
 import com.epam.esm.rest.resource_request.AddGcRequest;
 import com.epam.esm.rest.resource_request.UpdateGcRequest;
@@ -34,6 +35,7 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
 @RestController
 @RequestMapping("/gift-certificates")
 @Validated
+@XRayEnabled
 public class GiftCertificateController {
 
     private final GiftCertificateService gcService;

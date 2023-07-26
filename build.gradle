@@ -59,7 +59,6 @@ publishing {
                 username "aws"
                 password System.getProperty('codeartifact.auth.token')
 //                password System.getenv('CODEARTIFACT_AUTH_TOKEN')
-//                password "eyJ2ZXIiOjEsImlzdSI6MTY4OTk2MDcxOSwiZW5jIjoiQTEyOEdDTSIsInRhZyI6ImF6ZFFjSHliNWE4UUpSVUYtYXN5N3ciLCJleHAiOjE2OTAwMDM5MTksImFsZyI6IkExMjhHQ01LVyIsIml2IjoiTU9fQkZpV0RFdG1JZFdVeiJ9.jxjq7dfZHMg98twgpudsXw.hd9w77Zt1W1Ubeqc.HwSCUNPohnmMOsvVVJLllSR3lA5oGbFcXdWfjO66yC6p8-vE1osuRpWWLVMAUE0jgcbb5F6ZIc4zdgp2PF-VMXo93fE2aWynGHpR-jcyhNEdtDZlkTZ0AYntWgGjo6ix4teHJuM3tOLFDr6pcncLvls8FDWPNk5aUv8ZO4i3skDk4yPwrGGUw2Vbsnwb5_I3usM4q6PR8qAwNpP6Sr8gsXmxHvoDc7V_9vYaHt-JTskQgHXzYQ1Sc-tHnOO3ShYxDgsmUXijRZkfJFI63MBB87XOSQoU28qnL2ik8EMiHeg-6p5_Uvq_4mMTQB5HaqGz7vuiLBb65fC_AXdJoo_sYQMxkWFEoyNeh_1C0v38pSmf2JvzIXF9X-1IFTEdSEYkOHDoiKR66hgyetCbN_78qXAD-bNY0Zle1XhosLG49Pj_vcssuXGZrlxgX8RIEcJaxzQDZCJozeVKkWlAW1_F6cycZMt0KDKfqXmfj4ARXfLZvrlIzuXS1uMbCLLQPGO4ONltfJ1phC9bvor80KCrO0Hs87u0uprIOf8T6n9Mb3Z2lA2rO_vb_bv04fw1r-o7fMO1s87jM-avZLmG8eYmHHnOI8EaTSSxZhYowoxZiaDNBx9PHjt-NqelG0aWcSit53o-uPPp-lNHZ1iy-Ofy8AMnFM7Fy51BxwfJytw1NmXe8GAMQN8giI4aBetI125718kHM9T63IjwLpkqogXRuszjfKYm_TR4Uu22Qa_duEy-ki-bO8GhulOJQ0WnpJ1EAODwhK2wpZUxk01QxYGUE_rt22fD8piaF9iLQxAo79nJ_njsK2dCRMtoNp9RQY6UgG-5XyTlHjfBEL_ls4cxcR9qdMjFdQHUEe7YxYldvvT2ZX_gt_WjW7ptd-hlA9feOzuohQPmo6UvcDBFdLGlRgg1RWw.CJf5hhEYZvRcNrGGzV4wHw"
             }
         }
     }
@@ -106,6 +105,9 @@ dependencies {
 
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-devtools'
+    implementation 'org.springframework.boot:spring-boot-starter-aop'
+    implementation 'com.amazonaws:aws-xray-recorder-sdk-spring:2.14.0'
+    implementation 'software.amazon.codeguruprofiler:codeguru-profiler-java-agent:1.2.2'
     implementation 'org.apache.logging.log4j:log4j-core:2.17.1'
 
     providedRuntime 'org.springframework.boot:spring-boot-starter-tomcat'

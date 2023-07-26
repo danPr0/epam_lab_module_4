@@ -1,5 +1,6 @@
 package com.epam.esm.service_impl;
 
+import com.amazonaws.xray.spring.aop.XRayEnabled;
 import com.epam.esm.dto.UserDTO;
 import com.epam.esm.entity.User;
 import com.epam.esm.repository.ProviderRepository;
@@ -27,6 +28,7 @@ import java.util.Optional;
 
 @Service
 @Validated
+@XRayEnabled
 public class UserServiceImpl implements UserService {
 
     private final UserRepository     userRepository;
