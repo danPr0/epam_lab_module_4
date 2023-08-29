@@ -1,23 +1,23 @@
 spring:
   mail:
-    host: "smtp.gmail.com"
+    host: smtp.gmail.com
     port: 587
-    username: "email.sender.for.dev.purposes@gmail.com"
-    password: "hqlxeocgwajkhypt"
+    username: ENC(+KFdVL8p8ln1qtT1XOHcbz+bn+sMkSV85cx8qnI1D2HN1FptfS83c0RqEesC36Pg)
+    password: ENC(t61J2YlYp0EFB1bPEDmOp/TtKge+UP1FHwD+VVxj41g=)
     properties:
       mail:
         smtp:
-          auth: "true"
+          auth: true
           starttls:
-            enable: "true"
-            required: "true"
+            enable: true
+            required: true
 
 security:
   jwt:
     token:
-      secret-key: "EpamEsmLabModule4DanPro666SecretKey"
+      secret-key: 2BX59Uijp4zyaJsZ5XiejvOj3/aRqyQeRc1P6aDTJUUhrru/G1423YD5w//F5Hd5
       expire-length-in-sec:
-        access-token: "900"
-        refresh-token: "86400"
-        confirmation-token: "86400"
-        password-token: "86400"
+        access-token: 900
+        refresh-token: 86400
+        confirmation-token: 86400
+        password-token: 86400

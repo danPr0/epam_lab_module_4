@@ -9,6 +9,11 @@ import com.epam.esm.repository.GiftCertificateRepositoryCustom;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.criteria.*;
+import org.springframework.boot.autoconfigure.data.web.SpringDataWebProperties;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,19 +36,68 @@ public class GiftCertificateRepositoryCustomImpl implements GiftCertificateRepos
     private EntityManager em;
 
     @Override
-    public List<GiftCertificate> getAll(
-            int page, int total, Optional<List<String>> tagNames, Optional<String> namePart,
-            Optional<String> descriptionPart, Optional<String> nameOrder, Optional<String> createDateOrder) {
+    public PageImpl<GiftCertificate> getAll(
+            int page, int total, Optional<List<String>> tagNames, Optional<String> textFilter,
+            Optional<String> nameOrder, Optional<String> createDateOrder) {
 
-        CriteriaBuilder                cb       = em.getCriteriaBuilder();
-        CriteriaQuery<GiftCertificate> cq       = cb.createQuery(GiftCertificate.class);
-        Root<GiftCertificate>          cqRootGc = cq.from(GiftCertificate.class);
+        CriteriaBuilder cb = em.getCriteriaBuilder();
+
+        CriteriaQuery<GiftCertificate> certificateQuery =
+                createCertificatesQuery(cb, tagNames, textFilter, nameOrder, createDateOrder);
+        CriteriaQuery<Long> countQuery = createCountQuery(cb, tagNames, textFilter);
+
+        List<GiftCertificate> certificates =
+                em.createQuery(certificateQuery).setFirstResult((page - 1) * total).setMaxResults(total).getResultList();
+        Long totalCount = em.createQuery(countQuery).getSingleResult();
+
+        return new PageImpl<>(certificates, Pageable.ofSize(total), totalCount);
+    }
+
+    private CriteriaQuery<GiftCertificate> createCertificatesQuery(
+            CriteriaBuilder cb, Optional<List<String>> tagNames, Optional<String> textFilter,
+            Optional<String> nameOrder, Optional<String> createDateOrder) {
+
+        CriteriaQuery<GiftCertificate> cq   = cb.createQuery(GiftCertificate.class);
+        Root<GiftCertificate>          root = cq.from(GiftCertificate.class);
+
+        List<Predicate> predicates = createPredicates(tagNames, textFilter, cb, cq, root);
+
+        List<Order> orderList = new ArrayList<>();
+        createDateOrder.ifPresent(s -> orderList.add(s.equalsIgnoreCase("desc")
+                                                     ? cb.desc(root.get(GiftCertificate_.createdDate))
+                                                     : cb.asc(root.get(GiftCertificate_.createdDate))));
+        nameOrder.ifPresent(s -> orderList.add(s.equalsIgnoreCase("desc")
+                                               ? cb.desc(root.get(GiftCertificate_.name))
+                                               : cb.asc(root.get(GiftCertificate_.name))));
+        orderList.add(cb.asc(root.get(GiftCertificate_.id)));
+
+        cq.where(predicates.toArray(Predicate[]::new)).orderBy(orderList);
+
+        return cq;
+    }
+
+    private CriteriaQuery<Long> createCountQuery(
+            CriteriaBuilder cb, Optional<List<String>> tagNames, Optional<String> textFilter) {
+
+        CriteriaQuery<Long> cq = cb.createQuery(Long.class);
+        Root<GiftCertificate> root = cq.from(GiftCertificate.class);
+
+        List<Predicate> countPredicates =
+                createPredicates(tagNames, textFilter, cb, cq, root);
+        cq.select(cb.count(root)).where(countPredicates.toArray(Predicate[]::new));
+
+        return cq;
+    }
+
+    private List<Predicate> createPredicates(
+            Optional<List<String>> tagNames, Optional<String> textFilter, CriteriaBuilder cb, CriteriaQuery<?> cq,
+            Root<GiftCertificate> root) {
 
         List<Predicate> predicates = new ArrayList<>();
 
         Expression<Time> timeDiff =
-                cb.function("timediff", Time.class, cb.currentTimestamp(), cqRootGc.get(GiftCertificate_.createdDate));
-        predicates.add(cb.greaterThan(cb.prod(cqRootGc.get(GiftCertificate_.duration).as(Integer.class), 24 * 60 * 60),
+                cb.function("timediff", Time.class, cb.currentTimestamp(), root.get(GiftCertificate_.createdDate));
+        predicates.add(cb.greaterThan(cb.prod(root.get(GiftCertificate_.duration).as(Integer.class), 24 * 60 * 60),
                 cb.function("time_to_sec", Integer.class, timeDiff)));
 
         if (tagNames.isPresent()) {
@@ -53,27 +107,16 @@ public class GiftCertificateRepositoryCustomImpl implements GiftCertificateRepos
                 Join<GiftCertificate, Tag> sqJoinTag = sqRootGc.join(GiftCertificate_.tags, JoinType.LEFT);
 
                 predicates.add(cb.exists(sq.where(
-                        cb.and(cb.equal(cqRootGc.get(GiftCertificate_.id), sqRootGc.get(GiftCertificate_.id)),
+                        cb.and(cb.equal(root.get(GiftCertificate_.id), sqRootGc.get(GiftCertificate_.id)),
                                 cb.equal(sqJoinTag.get(Tag_.name), tagName)))));
             }
         }
 
-        namePart.ifPresent(
-                s -> predicates.add(cb.like(cb.lower(cqRootGc.get(GiftCertificate_.name)), '%' + s.toLowerCase() + '%')));
-        descriptionPart.ifPresent(
-                s -> predicates.add(cb.like(cb.lower(cqRootGc.get(GiftCertificate_.description)), '%' + s.toLowerCase() + '%')));
+        textFilter.ifPresent(
+                s -> predicates.add(cb.or(
+                        cb.like(cb.lower(root.get(GiftCertificate_.name)), '%' + s.toLowerCase() + '%'),
+                        cb.like(cb.lower(root.get(GiftCertificate_.description)), '%' + s.toLowerCase() + '%'))));
 
-        List<Order> orderList = new ArrayList<>();
-        nameOrder.ifPresent(s -> orderList.add(s.equalsIgnoreCase("desc")
-                ? cb.desc(cqRootGc.get(GiftCertificate_.name))
-                : cb.asc(cqRootGc.get(GiftCertificate_.name))));
-        createDateOrder.ifPresent(s -> orderList.add(s.equalsIgnoreCase("desc")
-                ? cb.desc(cqRootGc.get(GiftCertificate_.createdDate))
-                : cb.asc(cqRootGc.get(GiftCertificate_.createdDate))));
-        orderList.add(cb.asc(cqRootGc.get(GiftCertificate_.id)));
-
-        cq.where(cb.and(predicates.toArray(Predicate[]::new))).orderBy(orderList);
-
-        return em.createQuery(cq).setFirstResult((page - 1) * total).setMaxResults(total).getResultList();
+        return predicates;
     }
 }

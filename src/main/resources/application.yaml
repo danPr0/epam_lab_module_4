@@ -1,10 +1,15 @@
 spring:
   profiles:
-    active: "dev"
+    active: dev
 
 logging:
   level:
     root: info
+
+jasypt:
+  encryptor:
+    algorithm: PBEWithMD5AndDES
+    iv-generator-classname: org.jasypt.iv.NoIvGenerator
 
 #spring:
 #  main:

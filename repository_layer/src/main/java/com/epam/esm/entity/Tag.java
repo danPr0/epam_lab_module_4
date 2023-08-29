@@ -2,7 +2,6 @@ package com.epam.esm.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.envers.Audited;
 
 import java.util.List;
 import java.util.Objects;

@@ -1,12 +1,12 @@
 package com.epam.esm.entity;
 
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.experimental.SuperBuilder;
-import org.hibernate.envers.Audited;
 
-import java.io.Serializable;
-import java.time.Instant;
 import java.util.List;
 import java.util.Objects;
 

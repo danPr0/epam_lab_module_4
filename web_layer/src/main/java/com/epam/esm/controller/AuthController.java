@@ -21,6 +21,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -68,7 +69,8 @@ public class AuthController {
         } catch (Exception e) {
             logger.error(e.getMessage());
 
-            return ResponseEntity.badRequest().body("Bad credentials.");
+            return ResponseEntity.badRequest().body(
+                    Map.of("errorMessage", "Bad credentials.", "errorCode", "400"));
         }
 
         authTokenProvider.setAccessTokenCookie(authTokenProvider.generateAccessToken(request.getEmail()), response);

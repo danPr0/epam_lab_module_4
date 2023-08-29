@@ -16,6 +16,6 @@ public class SignInRequest {
     private String email;
 
     @NotBlank
-    @Size(min = 8)
+    @Size(min = 4, max = 30)
     private String password;
 }

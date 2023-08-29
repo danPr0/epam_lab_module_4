@@ -2,10 +2,7 @@ package com.epam.esm.rest.resource_request;
 
 
 import com.epam.esm.dto.TagDTO;
-import jakarta.validation.constraints.Digits;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.*;
 import lombok.*;
 
 import java.util.List;
@@ -21,9 +18,11 @@ import java.util.List;
 public class AddGcRequest {
 
     @NotBlank
+    @Size(min = 6, max = 30)
     private String name;
 
     @NotBlank
+    @Size(min = 12, max = 1000)
     private String description;
 
     @NotNull
@@ -32,7 +31,7 @@ public class AddGcRequest {
     private Double price;
 
     @NotNull
-    @Positive
+    @PositiveOrZero
     private Integer duration;
 
     @NotNull

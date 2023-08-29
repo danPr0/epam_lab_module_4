@@ -10,10 +10,10 @@ import lombok.Setter;
 public class ChangePasswordRequest {
 
     @NotBlank
-    @Size(min = 8)
+    @Size(min = 4, max = 30)
     private String oldPassword;
 
     @NotBlank
-    @Size(min = 8)
+    @Size(min = 4, max = 30)
     private String newPassword;
 }

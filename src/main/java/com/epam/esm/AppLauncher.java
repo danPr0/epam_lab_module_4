@@ -1,5 +1,6 @@
 package com.epam.esm;
 
+import com.ulisesbocchio.jasyptspringboot.annotation.EnableEncryptableProperties;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -10,7 +11,8 @@ import software.amazon.codeguruprofilerjavaagent.Profiler;
 
 import java.util.Properties;
 
-@SpringBootApplication()
+@SpringBootApplication
+@EnableEncryptableProperties
 public class AppLauncher extends SpringBootServletInitializer  {
 
     @Override
@@ -28,11 +30,12 @@ public class AppLauncher extends SpringBootServletInitializer  {
 //        springApp.setDefaultProperties(props);
 //        springApp.run(ars);
 //        springApp.setAdditionalProfiles("dev");
-        Profiler.builder()
-                .profilingGroupName("MyProfilingGroup")
-                .withHeapSummary(true)
-                .build()
-                .start();
+
+//        Profiler.builder()
+//                .profilingGroupName("MyProfilingGroup")
+//                .withHeapSummary(true)
+//                .build()
+//                .start();
 
         SpringApplication.run(AppLauncher.class, ars);
     }

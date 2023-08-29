@@ -10,11 +10,15 @@ import com.epam.esm.service.GiftCertificateService;
 import com.epam.esm.util_service.SortOrder;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.Link;
+import org.springframework.hateoas.LinkRelation;
+import org.springframework.hateoas.RepresentationModel;
+import org.springframework.hateoas.mediatype.hal.HalModelBuilder;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -66,10 +70,9 @@ public class GiftCertificateController {
     }
 
     @GetMapping
-    public ResponseEntity<CollectionModel<GiftCertificateDTO>> getAll(
+    public ResponseEntity<Object> getAll(
             @RequestParam(required = false, value = "tagName") Optional<List<String>> tagNames,
-            @RequestParam(required = false) Optional<String> namePart,
-            @RequestParam(required = false) Optional<String> descriptionPart,
+            @RequestParam(required = false) Optional<String> textFilter,
             @RequestParam(required = false) Optional<List<String>> sort, @RequestParam @Positive Integer page,
             @RequestParam @Positive Integer total) {
 
@@ -95,15 +98,22 @@ public class GiftCertificateController {
             }
         }
 
-        List<GiftCertificateDTO> giftCertificates =
-                gcService.getAll(page, total, tagNames, namePart, descriptionPart, nameOrder, createDateOrder);
+        Pair<List<GiftCertificateDTO>, Integer> gcPage =
+                gcService.getAll(page, total, tagNames, textFilter, nameOrder, createDateOrder);
 
-        for (GiftCertificateDTO gc : giftCertificates) {
+        for (GiftCertificateDTO gc : gcPage.getLeft()) {
             addLinkToResource(gc);
         }
 
-        Link link = linkTo(GiftCertificateController.class).withSelfRel();
-        return ResponseEntity.ok(CollectionModel.of(giftCertificates, link));
+        RepresentationModel<GiftCertificateDTO> model =
+                HalModelBuilder
+                        .halModel()
+                        .embed(gcPage.getLeft(), LinkRelation.of("giftCertificates"))
+                        .embed(gcPage.getRight(), LinkRelation.of("totalPages"))
+                        .link(linkTo(GiftCertificateController.class).withSelfRel())
+                        .build();
+
+        return ResponseEntity.ok(model);
     }
 
     @PostMapping

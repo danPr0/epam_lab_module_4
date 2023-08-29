@@ -1,11 +1,9 @@
 package com.epam.esm.dto;
 
 import com.epam.esm.entity.GiftCertificate;
-import jakarta.validation.constraints.Digits;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.*;
 import lombok.*;
+import org.hibernate.validator.constraints.Length;
 import org.springframework.hateoas.RepresentationModel;
 import org.springframework.hateoas.server.core.Relation;
 
@@ -30,21 +28,21 @@ public class GiftCertificateDTO extends RepresentationModel<GiftCertificateDTO> 
     @Positive
     private Long id;
 
-    @NotNull
     @NotBlank
+    @Size(min = 6, max = 30)
     private String name;
 
-    @NotNull
     @NotBlank
+    @Size(min = 12, max = 1000)
     private String description;
 
     @NotNull
     @Positive
-    @Digits(integer = 10, fraction = 3)
+    @Digits(integer = 10, fraction = 2)
     private Double price;
 
     @NotNull
-    @Positive
+    @PositiveOrZero
     private Integer       duration;
     private LocalDateTime createdDate;
     private LocalDateTime lastUpdatedDate;

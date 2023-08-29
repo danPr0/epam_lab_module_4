@@ -18,14 +18,17 @@ import java.util.List;
 @Setter
 public class UpdateGcRequest {
 
+    @Size(min = 6, max = 30)
     private String name;
+
+    @Size(min = 12, max = 1000)
     private String description;
 
     @Positive
     @Digits(integer = 10, fraction = 2)
     private Double price;
 
-    @Positive
+    @PositiveOrZero
     private Integer duration;
 
     private List<TagDTO> tags;

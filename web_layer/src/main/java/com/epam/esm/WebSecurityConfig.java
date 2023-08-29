@@ -1,7 +1,5 @@
 package com.epam.esm;
 
-import com.amazonaws.xray.jakarta.servlet.AWSXRayServletFilter;
-import com.amazonaws.xray.strategy.jakarta.SegmentNamingStrategy;
 import com.epam.esm.security.exception_handler.AuthEntryPointJwt;
 import com.epam.esm.security.exception_handler.CustomAccessDeniedHandler;
 import com.epam.esm.security.filter.AuthTokenFilter;
@@ -10,11 +8,12 @@ import com.epam.esm.security.oauth2.CustomOidcUserService;
 import com.epam.esm.security.oauth2.OAuth2AuthenticationFailureHandler;
 import com.epam.esm.security.oauth2.OAuth2AuthenticationSuccessHandler;
 import com.epam.esm.service.UserService;
-import jakarta.servlet.Filter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.YamlPropertiesFactoryBean;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.env.PropertiesPropertySource;
 import org.springframework.core.io.support.EncodedResource;
@@ -27,7 +26,11 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.Properties;
 
@@ -48,7 +51,7 @@ public class WebSecurityConfig {
     private final OAuth2AuthenticationSuccessHandler oAuth2SuccessHandler;
     private final OAuth2AuthenticationFailureHandler oAuth2FailureHandler;
 
-    private final AWSXRayServletFilter awsxRayServletFilter = new AWSXRayServletFilter(SegmentNamingStrategy.dynamic("Scorekeep"));
+//    private final AWSXRayServletFilter awsxRayServletFilter = new AWSXRayServletFilter(SegmentNamingStrategy.dynamic("Scorekeep"));
 
     @Autowired
     public WebSecurityConfig(
@@ -73,9 +76,9 @@ public class WebSecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
 
         httpSecurity.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
-                    .addFilterAfter(awsxRayServletFilter, UsernamePasswordAuthenticationFilter.class)
-                    .addFilterAfter(authTokenFilter, AWSXRayServletFilter.class)
-//                    .addFilterAfter(authTokenFilter, UsernamePasswordAuthenticationFilter.class)
+//                    .addFilterAfter(awsxRayServletFilter, UsernamePasswordAuthenticationFilter.class)
+//                    .addFilterAfter(authTokenFilter, AWSXRayServletFilter.class)
+                    .addFilterAfter(authTokenFilter, UsernamePasswordAuthenticationFilter.class)
                     .exceptionHandling().authenticationEntryPoint(authEntryPointJwt).and()
                     .exceptionHandling().accessDeniedHandler(accessDeniedHandler).and()
                     .authorizeHttpRequests()
@@ -83,7 +86,7 @@ public class WebSecurityConfig {
                     .requestMatchers(HttpMethod.GET, "/gift-certificates").permitAll()
                     .requestMatchers(HttpMethod.GET, "/gift-certificates/*").permitAll()
                     .requestMatchers("/reset-password", "/confirm-password-reset", "/error").permitAll()
-                    .requestMatchers("/change-password", "/logout").authenticated()
+                    .requestMatchers("/change-password", "/logout", "/check-authentication").authenticated()
                     .requestMatchers(HttpMethod.POST, "/orders").hasRole("USER")
                     .requestMatchers(HttpMethod.GET, "/orders*").hasRole("USER")
                     .requestMatchers(HttpMethod.GET, "/**").hasAnyRole("USER", "ADMIN")
@@ -98,6 +101,7 @@ public class WebSecurityConfig {
                     .failureHandler(oAuth2FailureHandler).and()
                     .httpBasic().disable()
                     .logout().disable()
+                    .cors().and()
                     .csrf().disable();
 
         return httpSecurity.build();
@@ -111,6 +115,20 @@ public class WebSecurityConfig {
         authenticationManagerBuilder.userDetailsService(userService).passwordEncoder(passwordEncoder);
 
         return authenticationManagerBuilder.build();
+    }
+
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.setAllowedOrigins(List.of("http://localhost:3000"));
+        configuration.setAllowedMethods(List.of("*"));
+        configuration.setAllowedHeaders(List.of("*"));
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+
+        return source;
     }
 
 /*    @Bean

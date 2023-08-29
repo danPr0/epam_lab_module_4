@@ -11,7 +11,10 @@ import com.epam.esm.service.GiftCertificateService;
 import com.epam.esm.util_service.DTOUtil;
 import com.epam.esm.util_service.SortOrder;
 import jakarta.validation.Valid;
+import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
@@ -45,6 +48,10 @@ public class GiftCertificateServiceImpl implements GiftCertificateService {
     @Override
     public GiftCertificateDTO addGiftCertificate(@Valid GiftCertificateDTO gcDTO) {
 
+        if (gcDTO.getDuration() == 0) {
+            gcDTO.setDuration(Integer.MAX_VALUE);
+        }
+
         return saveGiftCertificate(DTOUtil.convertToEntity(gcDTO));
     }
 
@@ -62,6 +69,10 @@ public class GiftCertificateServiceImpl implements GiftCertificateService {
         Optional<GiftCertificate> oldGc = gcRepository.findById(gcDTO.getId());
         if (oldGc.isEmpty()) {
             throw new TransactionFailException();
+        }
+
+        if (gcDTO.getDuration() == 0) {
+            gcDTO.setDuration(Integer.MAX_VALUE);
         }
 
         GiftCertificate newGc = DTOUtil.convertToEntity(gcDTO);
@@ -96,11 +107,16 @@ public class GiftCertificateServiceImpl implements GiftCertificateService {
     }
 
     @Override
-    public List<GiftCertificateDTO> getAll(
-            int page, int total, Optional<List<String>> tagNames, Optional<String> namePart,
-            Optional<String> descriptionPart, Optional<SortOrder> nameOrder, Optional<SortOrder> createDateOrder) {
+    public Pair<List<GiftCertificateDTO>, Integer> getAll(
+            int page, int total, Optional<List<String>> tagNames, Optional<String> textFilter,
+            Optional<SortOrder> nameOrder, Optional<SortOrder> createDateOrder) {
 
-        return gcRepository.getAll(page, total, tagNames, namePart, descriptionPart, nameOrder.map(Enum::name),
-                createDateOrder.map(Enum::name)).stream().map(DTOUtil::convertToDTO).toList();
+        Page<GiftCertificate> pageOfCertificates =
+                gcRepository.getAll(page, total, tagNames, textFilter, nameOrder.map(Enum::name),
+                        createDateOrder.map(Enum::name));
+        List<GiftCertificateDTO> certificates =
+                pageOfCertificates.getContent().stream().map(DTOUtil::convertToDTO).toList();
+
+        return Pair.of(certificates, pageOfCertificates.getTotalPages());
     }
 }

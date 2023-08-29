@@ -4,6 +4,7 @@ import com.epam.esm.dto.GiftCertificateDTO;
 import com.epam.esm.exception.TransactionFailException;
 import com.epam.esm.util_service.SortOrder;
 import jakarta.validation.Valid;
+import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.List;
 import java.util.Optional;
@@ -24,7 +25,7 @@ public interface GiftCertificateService {
 
     boolean deleteGiftCertificate(long id);
 
-    List<GiftCertificateDTO> getAll(
-            int page, int total, Optional<List<String>> tagNames, Optional<String> namePart,
-            Optional<String> descriptionPart, Optional<SortOrder> nameOrder, Optional<SortOrder> createDateOrder);
+    Pair<List<GiftCertificateDTO>, Integer> getAll(
+            int page, int total, Optional<List<String>> tagNames, Optional<String> textFilter,
+             Optional<SortOrder> nameOrder, Optional<SortOrder> createDateOrder);
 }

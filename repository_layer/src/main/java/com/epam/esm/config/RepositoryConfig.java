@@ -1,4 +1,4 @@
-package com.epam.esm;
+package com.epam.esm.config;
 
 import org.springframework.beans.factory.config.YamlPropertiesFactoryBean;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;

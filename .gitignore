@@ -4,6 +4,9 @@ HELP.md
 service_layer/src/main/java/com/epam/esm/FillTablesConfig.java
 service_layer/src/main/java/com/epam/esm/util_service/FillTablesUtil.java
 
+#Docker secrets
+module4-docker/secrets
+
 #Out directory
 out
 

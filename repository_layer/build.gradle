@@ -1,7 +1,6 @@
 plugins {
     id 'java'
-    id 'org.springframework.boot' version '3.0.6'
-    id 'io.spring.dependency-management' version '1.1.0'
+    id 'org.springframework.boot' version libs.versions.spring.boot
     id 'jacoco'
 }
 
@@ -18,26 +17,20 @@ bootJar {
 }
 
 dependencies {
+    implementation libs.spring.boot.data.jpa
+    implementation libs.spring.boot.hateoas
+    implementation libs.spring.boot.security
+    implementation libs.spring.boot.aop
+    implementation libs.mysql
+    implementation libs.amazon.xray
+    implementation libs.amazon.codeguru.profiler
 
-    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-    implementation 'org.springframework.boot:spring-boot-starter-hateoas'
-    implementation 'org.springframework.boot:spring-boot-starter-security'
-    implementation 'org.springframework.boot:spring-boot-starter-aop'
-    implementation 'org.hibernate:hibernate-envers:6.1.7.Final'
-    implementation 'mysql:mysql-connector-java:8.0.33'
-    implementation 'org.jooq:jooq:3.18.4'
-    implementation 'com.amazonaws:aws-xray-recorder-sdk-spring:2.14.0'
-    implementation 'software.amazon.codeguruprofiler:codeguru-profiler-java-agent:1.2.2'
-//    implementation 'javax.xml.bind:jaxb-api:2.3.1'
-//    implementation 'org.glassfish.jaxb:jaxb-runtime:2.3.1'
+    compileOnly libs.lombok
+    annotationProcessor libs.lombok
+    annotationProcessor libs.hibernate.jpamodelgen
 
-
-    compileOnly 'org.projectlombok:lombok:1.18.26'
-    annotationProcessor 'org.projectlombok:lombok:1.18.26'
-    annotationProcessor('org.hibernate.orm:hibernate-jpamodelgen:6.2.5.Final')
-
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
+    testImplementation libs.junit.api
+    testRuntimeOnly libs.junit.engine
 }
 
 tasks.named('test') {

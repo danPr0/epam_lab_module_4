@@ -25,7 +25,7 @@ public class ExceptionController {
 
     @ExceptionHandler(value = {MethodArgumentNotValidException.class, MissingServletRequestParameterException.class,
             ConstraintViolationException.class})
-    public ResponseEntity<?> invalidRequest(Exception ex) {
+    public ResponseEntity<Object> invalidRequest(Exception ex) {
 
         logger.error(ex);
 
@@ -34,7 +34,7 @@ public class ExceptionController {
     }
 
     @ExceptionHandler(value = {Exception.class})
-    public ResponseEntity<?> handleGeneralException(Exception ex) {
+    public ResponseEntity<Object> handleGeneralException(Exception ex) {
 
         logger.error(ex);
 

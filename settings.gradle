@@ -3,3 +3,46 @@ rootProject.name = 'module4'
 include 'web_layer'
 include 'repository_layer'
 include 'service_layer'
+
+dependencyResolutionManagement {
+    versionCatalogs {
+        libs {
+            version('spring', '6.0.6')
+            version('spring-boot', '3.0.6')
+            version('hibernate', '6.2.5.Final')
+            version('jwt', '0.11.5')
+            version('junit', '5.8.1')
+
+            library('spring-boot-web', 'org.springframework.boot', 'spring-boot-starter-web').versionRef('spring-boot')
+            library('spring-boot-devtools', 'org.springframework.boot', 'spring-boot-devtools').versionRef('spring-boot')
+            library('spring-boot-aop', 'org.springframework.boot', 'spring-boot-starter-aop').versionRef('spring-boot')
+            library('spring-boot-tomcat', 'org.springframework.boot', 'spring-boot-starter-tomcat').versionRef('spring-boot')
+            library('spring-boot-security', 'org.springframework.boot', 'spring-boot-starter-security').versionRef('spring-boot')
+            library('spring-boot-oauth2', 'org.springframework.boot', 'spring-boot-starter-oauth2-client').versionRef('spring-boot')
+            library('spring-boot-hateoas', 'org.springframework.boot', 'spring-boot-starter-hateoas').versionRef('spring-boot')
+            library('spring-boot-validation', 'org.springframework.boot', 'spring-boot-starter-validation').versionRef('spring-boot')
+            library('spring-boot-data-jpa', 'org.springframework.boot', 'spring-boot-starter-data-jpa').versionRef('spring-boot')
+            library('spring-boot-mail', 'org.springframework.boot', 'spring-boot-starter-mail').versionRef('spring-boot')
+            library('spring-boot-test', 'org.springframework.boot', 'spring-boot-starter-test').versionRef('spring-boot')
+            library('spring-transaction', 'org.springframework', 'spring-tx').versionRef('spring')
+
+            library('mysql', 'mysql:mysql-connector-java:8.0.33')
+            library('log4j-core', 'org.apache.logging.log4j:log4j-core:2.17.1')
+            library('commons-lang3', 'org.apache.commons:commons-lang3:3.12.0')
+            library('lombok', 'org.projectlombok:lombok:1.18.26')
+            library('hibernate-jpamodelgen', 'org.hibernate.orm:hibernate-jpamodelgen:6.2.5.Final')
+            library('jasypt-starter', 'com.github.ulisesbocchio:jasypt-spring-boot-starter:3.0.4')
+
+            library('jwt-api', 'io.jsonwebtoken:jjwt-api:0.11.5')
+            library('jwt-impl', 'io.jsonwebtoken:jjwt-impl:0.11.5')
+            library('jwt-jackson', 'io.jsonwebtoken:jjwt-jackson:0.11.5')
+
+            library('amazon-xray', 'com.amazonaws:aws-xray-recorder-sdk-spring:2.14.0')
+            library('amazon-codeguru-profiler', 'software.amazon.codeguruprofiler:codeguru-profiler-java-agent:1.2.2')
+
+            library('junit-api', 'org.junit.jupiter', 'junit-jupiter-api').versionRef('junit')
+            library('junit-engine', 'org.junit.jupiter', 'junit-jupiter-engine').versionRef('junit')
+            library('mockito-core', 'org.mockito:mockito-core:5.3.1')
+        }
+    }
+}

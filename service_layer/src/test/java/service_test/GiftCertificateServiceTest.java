@@ -9,11 +9,14 @@ import com.epam.esm.repository.GiftCertificateRepository;
 import com.epam.esm.repository.TagRepository;
 import com.epam.esm.service.GiftCertificateService;
 import com.epam.esm.service_impl.GiftCertificateServiceImpl;
+import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -148,13 +151,18 @@ public class GiftCertificateServiceTest extends Mockito {
     @Test
     public void testGetAll() {
 
-        when(gcRepository.getAll(1, 500, Optional.of(List.of(tag1.getName(), tag2.getName())), Optional.empty(),
-                Optional.empty(), Optional.empty(), Optional.empty())).thenReturn(List.of(gc));
+        int page = 1;
+        int pageSize = 500;
+        int totalCount = 1001;
 
-        assertEquals(List.of(gcDTO),
-                gcService.getAll(1, 500, Optional.of(List.of(tag1.getName(), tag2.getName())), Optional.empty(),
-                        Optional.empty(), Optional.empty(), Optional.empty()));
-        verify(gcRepository).getAll(1, 500, Optional.of(List.of(tag1.getName(), tag2.getName())), Optional.empty(),
+        when(gcRepository.getAll(page, pageSize, Optional.of(List.of(tag1.getName(), tag2.getName())), Optional.empty(),
+                Optional.empty(), Optional.empty())).thenReturn(
+                new PageImpl<>(List.of(gc), Pageable.ofSize(pageSize), totalCount));
+
+        assertEquals(Pair.of(List.of(gcDTO), 3),
+                gcService.getAll(page, pageSize, Optional.of(List.of(tag1.getName(), tag2.getName())), Optional.empty(),
+                        Optional.empty(), Optional.empty()));
+        verify(gcRepository).getAll(page, pageSize, Optional.of(List.of(tag1.getName(), tag2.getName())),
                 Optional.empty(), Optional.empty(), Optional.empty());
     }
 }
