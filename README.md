@@ -9,8 +9,6 @@ The purpose was to learn building REST API using all aspects of Spring framework
 * Java 17
 * Spring boot 3
 * MySQL 8.0
-## Setup
-Just clone this repository and run main file [AppLauncher.java](https://github.com/danPr0/epam_lab_module_4/blob/master/src/main/java/com/epam/esm/AppLauncher.java)
 ## Features
 * Authentication and authorization is done with JWT. Users can log in with their Google and Github accounts through OAuth2 and OpenId Connect.
 * User get email letters to confirm registration and reset password.
