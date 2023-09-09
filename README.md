@@ -12,7 +12,7 @@ The purpose was to learn building REST API using all aspects of Spring framework
 ## Features
 * Authentication and authorization is done with JWT. Users can log in with their Google and Github accounts through OAuth2 and OpenId Connect.
 * User get email letters to confirm registration and reset password.
-* Gift Certificates query with multiple search, sort and pagination
+* Gift Certificates query with multiple searches, sorts and pagination
 * Support HATEOAS on REST endpoints.
 * Properties are encrypted using Jasypt
 * AWS X-Ray tracing and AWS CodeGuru profiling
