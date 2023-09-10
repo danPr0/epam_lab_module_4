@@ -5,10 +5,7 @@ import com.epam.esm.repository.TagRepository;
 import com.epam.esm.service.TagService;
 import com.epam.esm.util_service.DTOUtil;
 import jakarta.validation.Valid;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
@@ -25,8 +22,6 @@ import java.util.Optional;
 public class TagServiceImpl implements TagService {
 
     private final TagRepository tagRepository;
-
-    private final Logger logger = LogManager.getLogger(TagServiceImpl.class);
 
     @Autowired
     public TagServiceImpl(TagRepository tagRepository) {

@@ -2,7 +2,6 @@ package com.epam.esm.service;
 
 import com.epam.esm.dto.OrderDTO;
 import jakarta.validation.Valid;
-import org.springframework.validation.annotation.Validated;
 
 import java.util.List;
 

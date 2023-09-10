@@ -25,7 +25,7 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest(classes = {OrderServiceImpl.class})
-public class OrderServiceTest extends Mockito {
+class OrderServiceTest extends Mockito {
 
     @Autowired
     private OrderService orderService;
@@ -71,7 +71,7 @@ public class OrderServiceTest extends Mockito {
     }
 
     @Test
-    public void testGetUserOrders() {
+    void testGetUserOrders() {
 
         PageRequest pageRequest = PageRequest.of(0, 1, Sort.by(Sort.Direction.ASC, Order_.CREATED_DATE));
         when(orderRepository.findAllByUserEmail(user.getEmail(), pageRequest)).thenReturn(new PageImpl<>(List.of(order)));
@@ -81,7 +81,7 @@ public class OrderServiceTest extends Mockito {
     }
 
     @Test
-    public void testAddOrderSuccess() {
+    void testAddOrderSuccess() {
 
         Order orderToAdd = order.clone();
         orderToAdd.setId(null);
@@ -103,7 +103,7 @@ public class OrderServiceTest extends Mockito {
     }
 
     @Test
-    public void testAddOrderFailOnEmptyUser() {
+    void testAddOrderFailOnEmptyUser() {
 
         when(userRepository.findByEmail(user.getEmail())).thenReturn(Optional.empty());
 
@@ -111,7 +111,7 @@ public class OrderServiceTest extends Mockito {
     }
 
     @Test
-    public void testAddOrderFailOnEmptyGiftCertificate() {
+    void testAddOrderFailOnEmptyGiftCertificate() {
 
         when(userRepository.findByEmail(user.getEmail())).thenReturn(Optional.of(user));
         when(gcRepository.findById(gc1.getId())).thenReturn(Optional.empty());

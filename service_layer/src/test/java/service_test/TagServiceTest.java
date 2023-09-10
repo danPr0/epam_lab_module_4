@@ -16,7 +16,7 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest(classes = {TagServiceImpl.class})
-public class TagServiceTest extends Mockito {
+class TagServiceTest extends Mockito {
 
     @Autowired
     private TagService tagService;
@@ -29,7 +29,7 @@ public class TagServiceTest extends Mockito {
     private final TagDTO tagDTO = new TagDTO("1");
 
     @Test
-    public void testAddTagSuccess() {
+    void testAddTagSuccess() {
 
         when(tagRepository.findByName(tagDTO.getName())).thenReturn(Optional.empty());
         when(tagRepository.save(tag)).thenReturn(tag);
@@ -39,7 +39,7 @@ public class TagServiceTest extends Mockito {
     }
 
     @Test
-    public void testAddTagFail() {
+    void testAddTagFail() {
 
         when(tagRepository.findByName(tagDTO.getName())).thenReturn(Optional.of(tag));
 
@@ -47,7 +47,7 @@ public class TagServiceTest extends Mockito {
     }
 
     @Test
-    public void testGetTagSuccess() {
+    void testGetTagSuccess() {
 
         when(tagRepository.findByName(tagDTO.getName())).thenReturn(Optional.of(tag));
 
@@ -56,7 +56,7 @@ public class TagServiceTest extends Mockito {
     }
 
     @Test
-    public void testGetTagFail() {
+    void testGetTagFail() {
 
         when(tagRepository.findByName(tagDTO.getName())).thenReturn(Optional.empty());
 
@@ -65,7 +65,7 @@ public class TagServiceTest extends Mockito {
     }
 
     @Test
-    public void testComplexQuerySuccess() {
+    void testComplexQuerySuccess() {
 
         when(tagRepository.complexJPQLQuery()).thenReturn(Optional.of(tag));
 
@@ -74,7 +74,7 @@ public class TagServiceTest extends Mockito {
     }
 
     @Test
-    public void testComplexQueryFail() {
+    void testComplexQueryFail() {
         when(tagRepository.complexJPQLQuery()).thenReturn(Optional.empty());
 
         assertEquals(Optional.empty(), tagService.getMostPopularUserTag());
@@ -82,7 +82,7 @@ public class TagServiceTest extends Mockito {
     }
 
     @Test
-    public void testDeleteTagSuccess() {
+    void testDeleteTagSuccess() {
 
         when(tagRepository.findByName(tagDTO.getName())).thenReturn(Optional.of(tag));
         doNothing().when(tagRepository).deleteByName(tagDTO.getName());
@@ -92,7 +92,7 @@ public class TagServiceTest extends Mockito {
     }
 
     @Test
-    public void testDeleteTagFail() {
+    void testDeleteTagFail() {
 
         when(tagRepository.findByName(tagDTO.getName())).thenReturn(Optional.empty());
 

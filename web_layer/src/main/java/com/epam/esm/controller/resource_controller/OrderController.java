@@ -32,8 +32,8 @@ public class OrderController {
 
     private final OrderService orderService;
 
-    private final String resourceCode = "04";
-    private final Logger logger       = LogManager.getLogger(OrderController.class);
+    private static final String RESOURCE_CODE = "04";
+    private final Logger        logger        = LogManager.getLogger(OrderController.class);
 
     @Autowired
     public OrderController(OrderService orderService) {
@@ -69,7 +69,7 @@ public class OrderController {
             String errorMsg = "Resource gift certificate doesn't exist";
             logger.error(errorMsg);
 
-            return ResponseEntity.status(404).body(Map.of("errorMessage", errorMsg, "errorCode", "404" + resourceCode));
+            return ResponseEntity.status(404).body(Map.of("errorMessage", errorMsg, "errorCode", "404" + RESOURCE_CODE));
         }
     }
 }

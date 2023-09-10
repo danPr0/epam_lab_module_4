@@ -8,7 +8,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.util.Map;
@@ -29,7 +28,7 @@ public class UserController {
 
     private final UserService userService;
 
-    private final String resourceCode = "03";
+    private static final String RESOURCE_CODE = "03";
 
     @Autowired
     public UserController(UserService userService) {
@@ -50,7 +49,7 @@ public class UserController {
         } else {
             return ResponseEntity.status(404)
                     .body(Map.of("errorMessage", String.format("Requested resource not found (email = %s)", email),
-                            "errorCode", "404" + resourceCode));
+                            "errorCode", "404" + RESOURCE_CODE));
         }
     }
 }

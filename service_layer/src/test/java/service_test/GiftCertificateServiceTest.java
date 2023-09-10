@@ -25,7 +25,7 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest(classes = {GiftCertificateServiceImpl.class})
-public class GiftCertificateServiceTest extends Mockito {
+class GiftCertificateServiceTest extends Mockito {
 
     @Autowired
     private GiftCertificateService gcService;
@@ -63,7 +63,7 @@ public class GiftCertificateServiceTest extends Mockito {
     }
 
     @Test
-    public void testAddGiftCertificateSuccess() {
+    void testAddGiftCertificateSuccess() {
 
         GiftCertificate gcToAdd = gc.clone();
         gcToAdd.setId(null);
@@ -85,7 +85,7 @@ public class GiftCertificateServiceTest extends Mockito {
     }
 
     @Test
-    public void testGetGiftCertificateSuccess() {
+    void testGetGiftCertificateSuccess() {
 
         when(gcRepository.findById(gc.getId())).thenReturn(Optional.of(gc));
 
@@ -94,7 +94,7 @@ public class GiftCertificateServiceTest extends Mockito {
     }
 
     @Test
-    public void testGetGiftCertificateFail() {
+    void testGetGiftCertificateFail() {
 
         when(gcRepository.findById(gc.getId())).thenReturn(Optional.empty());
 
@@ -103,7 +103,7 @@ public class GiftCertificateServiceTest extends Mockito {
     }
 
     @Test
-    public void testUpdateGiftCertificateSuccess() {
+    void testUpdateGiftCertificateSuccess() {
 
         GiftCertificate gcToUpdate = gc.clone();
         gcToUpdate.setLastModifiedDate(null);
@@ -123,7 +123,7 @@ public class GiftCertificateServiceTest extends Mockito {
     }
 
     @Test
-    public void testUpdateGiftCertificateFail() {
+    void testUpdateGiftCertificateFail() {
 
         when(gcRepository.findById(gcDTO.getId())).thenReturn(Optional.empty());
 
@@ -131,7 +131,7 @@ public class GiftCertificateServiceTest extends Mockito {
     }
 
     @Test
-    public void deleteGiftCertificateSuccess() {
+    void deleteGiftCertificateSuccess() {
 
         when(gcRepository.findById(gc.getId())).thenReturn(Optional.of(gc));
         doNothing().when(gcRepository).deleteById(gc.getId());
@@ -141,7 +141,7 @@ public class GiftCertificateServiceTest extends Mockito {
     }
 
     @Test
-    public void deleteGiftCertificateFail() {
+    void deleteGiftCertificateFail() {
 
         when(gcRepository.findById(gc.getId())).thenReturn(Optional.empty());
 
@@ -149,7 +149,7 @@ public class GiftCertificateServiceTest extends Mockito {
     }
 
     @Test
-    public void testGetAll() {
+    void testGetAll() {
 
         int page = 1;
         int pageSize = 500;

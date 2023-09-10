@@ -3,7 +3,6 @@ package com.epam.esm.dto;
 import com.epam.esm.entity.GiftCertificate;
 import jakarta.validation.constraints.*;
 import lombok.*;
-import org.hibernate.validator.constraints.Length;
 import org.springframework.hateoas.RepresentationModel;
 import org.springframework.hateoas.server.core.Relation;
 

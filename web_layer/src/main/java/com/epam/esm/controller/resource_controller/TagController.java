@@ -25,7 +25,9 @@ public class TagController {
 
     private final TagService tagService;
 
-    private final String resourceCode = "02";
+    private static final String RESOURCE_CODE     = "02";
+    private static final String ERROR_MESSAGE_KEY = "errorMessage";
+    private static final String ERROR_CODE_KEY    = "errorCode";
 
     @Autowired
     public TagController(TagService tagService) {
@@ -44,8 +46,8 @@ public class TagController {
             return ResponseEntity.ok(tag.get());
         } else {
             return ResponseEntity.status(404)
-                    .body(Map.of("errorMessage", String.format("Requested resource not found (name = %s)", name),
-                            "errorCode", "404" + resourceCode));
+                    .body(Map.of(ERROR_MESSAGE_KEY, String.format("Requested resource not found (name = %s)", name),
+                            ERROR_CODE_KEY, "404" + RESOURCE_CODE));
         }
     }
 
@@ -60,8 +62,8 @@ public class TagController {
             return ResponseEntity.ok(tag.get());
         } else {
             return ResponseEntity.status(404)
-                    .body(Map.of("errorMessage", "Resource not found",
-                            "errorCode", "404" + resourceCode));
+                    .body(Map.of(ERROR_MESSAGE_KEY, "Resource not found",
+                            ERROR_CODE_KEY, "404" + RESOURCE_CODE));
         }
     }
 
@@ -75,8 +77,8 @@ public class TagController {
             return ResponseEntity.status(201).body(tag);
         } else {
             return ResponseEntity.status(409)
-                    .body(Map.of("errorMessage", String.format("Resource already exists (name = %s)", req.getName()),
-                            "errorCode", "409" + resourceCode));
+                    .body(Map.of(ERROR_MESSAGE_KEY, String.format("Resource already exists (name = %s)", req.getName()),
+                            ERROR_CODE_KEY, "409" + RESOURCE_CODE));
         }
     }
 
@@ -87,8 +89,8 @@ public class TagController {
             return ResponseEntity.status(204).build();
         } else {
             return ResponseEntity.status(404)
-                    .body(Map.of("errorMessage", String.format("Requested resource not found (name = %s)", name),
-                            "errorCode", "404" + resourceCode));
+                    .body(Map.of(ERROR_MESSAGE_KEY, String.format("Requested resource not found (name = %s)", name),
+                            ERROR_CODE_KEY, "404" + RESOURCE_CODE));
         }
     }
 

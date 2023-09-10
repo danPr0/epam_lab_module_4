@@ -21,7 +21,7 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest(classes = {UserServiceImpl.class})
-public class UserServiceTest extends Mockito {
+class UserServiceTest extends Mockito {
 
     @Autowired
     private UserService userService;
@@ -42,7 +42,7 @@ public class UserServiceTest extends Mockito {
             UserDTO.builder().email("1").username("1").firstName("1").lastName("1").provider(ProviderName.LOCAL).build();
 
     @Test
-    public void testGetTagSuccess() {
+    void testGetTagSuccess() {
 
         when(userRepository.findByEmail(user1.getEmail())).thenReturn(Optional.of(user1));
 
@@ -51,7 +51,7 @@ public class UserServiceTest extends Mockito {
     }
 
     @Test
-    public void testGetTagFail() {
+    void testGetTagFail() {
 
         when(userRepository.findByEmail(user1.getEmail())).thenReturn(Optional.empty());
 

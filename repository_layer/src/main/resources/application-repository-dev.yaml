@@ -4,13 +4,6 @@ spring:
     url: jdbc:mysql://localhost:3306/epam_module_4
     username: ENC(gEg6N32m5uDVpQgu+li3wg==)
     password: ENC(v4O9IeZtqen4e2LqeRoRjA==)
-#    url: jdbc:mysql://localhost:8083/epam_lab_module_4
-#    username: ENC(9cifjxrjzvD+BrqNvR5VBWlwb4TjRRWe)
-#    password: ENC(RAbUqCypQaFS6s9NyuMKFxtLWBCyz+h8)
-#    url: jdbc:mysql://module4-app-mysql-db:3306/epam_lab_module_4
-#    username: ENC(9cifjxrjzvD+BrqNvR5VBWlwb4TjRRWe)
-#    password: ENC(RAbUqCypQaFS6s9NyuMKFxtLWBCyz+h8)
-
   jpa:
     properties:
       hibernate:

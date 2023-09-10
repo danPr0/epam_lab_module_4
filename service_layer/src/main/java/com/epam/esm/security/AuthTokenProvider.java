@@ -31,8 +31,8 @@ public class AuthTokenProvider extends TokenProvider {
     @Value("${security.jwt.token.expire-length-in-sec.refresh-token}")
     private int refreshTokenExpirationInSec;
 
-    private final String accessTokenCookieName  = "accessToken";
-    private final String refreshTokenCookieName = "refreshToken";
+    private static final String ACCESS_TOKEN_COOKIE_NAME  = "accessToken";
+    private static final String REFRESH_TOKEN_COOKIE_NAME = "refreshToken";
 
     @Autowired
     public AuthTokenProvider(UserService userService) {
@@ -71,22 +71,22 @@ public class AuthTokenProvider extends TokenProvider {
 
     public void setAccessTokenCookie(String token, HttpServletResponse response) {
 
-        setTokenCookie(token, accessTokenCookieName, accessTokenExpirationInSec, response);
+        setTokenCookie(token, ACCESS_TOKEN_COOKIE_NAME, accessTokenExpirationInSec, response);
     }
 
     public void setRefreshTokenCookie(String token, HttpServletResponse response) {
 
-        setTokenCookie(token, refreshTokenCookieName, refreshTokenExpirationInSec, response);
+        setTokenCookie(token, REFRESH_TOKEN_COOKIE_NAME, refreshTokenExpirationInSec, response);
     }
 
     public void removeAccessTokenCookie(HttpServletResponse response) {
 
-        setTokenCookie("", accessTokenCookieName, 0, response);
+        setTokenCookie("", ACCESS_TOKEN_COOKIE_NAME, 0, response);
     }
 
     public void removeRefreshTokenCookie(HttpServletResponse response) {
 
-        setTokenCookie("", refreshTokenCookieName, 0, response);
+        setTokenCookie("", REFRESH_TOKEN_COOKIE_NAME, 0, response);
     }
 
     private void setTokenCookie(String token, String tokenName, int maxAgeInSec, HttpServletResponse response) {
@@ -100,12 +100,12 @@ public class AuthTokenProvider extends TokenProvider {
 
     public Optional<String> resolveAccessToken(HttpServletRequest request) {
 
-        return resolveToken(accessTokenCookieName, request);
+        return resolveToken(ACCESS_TOKEN_COOKIE_NAME, request);
     }
 
     public Optional<String> resolveRefreshToken(HttpServletRequest request) {
 
-        return resolveToken(refreshTokenCookieName, request);
+        return resolveToken(REFRESH_TOKEN_COOKIE_NAME, request);
     }
 
     private Optional<String> resolveToken(String tokenName, HttpServletRequest request) {

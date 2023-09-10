@@ -1,9 +1,8 @@
 package com.epam.esm.config;
 
 import org.springframework.beans.factory.config.YamlPropertiesFactoryBean;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.env.PropertiesPropertySource;
 import org.springframework.core.io.support.EncodedResource;
@@ -15,8 +14,7 @@ import java.security.SecureRandom;
 import java.util.Objects;
 import java.util.Properties;
 
-@Configuration
-@EnableAutoConfiguration
+@SpringBootApplication
 @PropertySource(value = "classpath:/application-service.yaml", factory = ServiceConfig.YamlPropertySourceFactory.class)
 public class ServiceConfig {
 

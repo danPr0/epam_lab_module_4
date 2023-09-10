@@ -8,7 +8,7 @@ public abstract class OAuth2UserInfo {
 
     protected OAuth2User oAuth2User;
 
-    public OAuth2UserInfo(OAuth2User oAuth2User) {
+    protected OAuth2UserInfo(OAuth2User oAuth2User) {
         this.oAuth2User = oAuth2User;
     }
 

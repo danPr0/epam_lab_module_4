@@ -2,6 +2,7 @@ package com.epam.esm.util_service;
 
 import com.epam.esm.dto.*;
 import com.epam.esm.entity.*;
+import lombok.experimental.UtilityClass;
 
 /**
  * Class for converting DTOs to entities and vice versa.
@@ -9,6 +10,7 @@ import com.epam.esm.entity.*;
  * @author Danylo Proshyn
  */
 
+@UtilityClass
 public class DTOUtil {
 
     public static GiftCertificateDTO convertToDTO(GiftCertificate gc) {

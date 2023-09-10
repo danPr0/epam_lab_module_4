@@ -2,8 +2,6 @@ package com.epam.esm.dto;
 
 import com.epam.esm.entity.Tag;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 import org.springframework.hateoas.RepresentationModel;

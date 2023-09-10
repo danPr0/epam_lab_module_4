@@ -40,7 +40,7 @@ public class EmailServiceImpl implements EmailService {
         message.setTo(receiver);
         message.setSubject("Password reset");
         message.setText(String.format(
-                "Your new password will be: %s \nTo reset your password, please click go to this link : %s",
+                "Your new password will be: %s %nTo reset your password, please click go to this link : %s",
                 newPassword, forwardLink));
         mailSender.send(message);
     }

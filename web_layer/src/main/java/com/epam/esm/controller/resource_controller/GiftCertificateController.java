@@ -14,8 +14,6 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.hateoas.CollectionModel;
-import org.springframework.hateoas.Link;
 import org.springframework.hateoas.LinkRelation;
 import org.springframework.hateoas.RepresentationModel;
 import org.springframework.hateoas.mediatype.hal.HalModelBuilder;
@@ -42,10 +40,13 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
 @XRayEnabled
 public class GiftCertificateController {
 
-    private final GiftCertificateService gcService;
+    private static final String RESOURCE_CODE     = "01";
+    private static final String ERROR_MESSAGE_KEY = "errorMessage";
+    private static final String ERROR_CODE_KEY    = "errorCode";
 
-    private final String resourceCode = "01";
-    private final Logger logger       = LogManager.getLogger(GiftCertificateController.class);
+
+    private final GiftCertificateService gcService;
+    private final Logger                 logger = LogManager.getLogger(GiftCertificateController.class);
 
     @Autowired
     public GiftCertificateController(GiftCertificateService gcService) {
@@ -64,8 +65,8 @@ public class GiftCertificateController {
             return ResponseEntity.ok(gc.get());
         } else {
             return ResponseEntity.status(404)
-                    .body(Map.of("errorMessage", String.format("Requested resource not found (id = %s)", id),
-                            "errorCode", "404" + resourceCode));
+                    .body(Map.of(ERROR_MESSAGE_KEY, String.format("Requested resource not found (id = %s)", id),
+                            ERROR_CODE_KEY, "404" + RESOURCE_CODE));
         }
     }
 
@@ -82,17 +83,17 @@ public class GiftCertificateController {
         if (sort.isPresent()) {
 
             if (sort.get().contains("name_asc")) {
-                nameOrder = Optional.of(SortOrder.asc);
+                nameOrder = Optional.of(SortOrder.ASC);
             } else if (sort.get().contains("name_desc")) {
-                nameOrder = Optional.of(SortOrder.desc);
+                nameOrder = Optional.of(SortOrder.DESC);
             } else {
                 nameOrder = Optional.empty();
             }
 
             if (sort.get().contains("createDate_asc")) {
-                createDateOrder = Optional.of(SortOrder.asc);
+                createDateOrder = Optional.of(SortOrder.ASC);
             } else if (sort.get().contains("createDate_desc")) {
-                createDateOrder = Optional.of(SortOrder.desc);
+                createDateOrder = Optional.of(SortOrder.DESC);
             } else {
                 createDateOrder = Optional.empty();
             }
@@ -132,24 +133,27 @@ public class GiftCertificateController {
             @PathVariable long id, @Valid @RequestBody UpdateGcRequest req) {
 
         try {
-            GiftCertificateDTO gc = gcService.getGiftCertificate(id).get();
+            Optional<GiftCertificateDTO> gc = gcService.getGiftCertificate(id);
+            if (gc.isEmpty()) {
+                throw new NoSuchElementException();
+            }
             if (req.getName() != null) {
-                gc.setName(req.getName());
+                gc.get().setName(req.getName());
             }
             if (req.getDescription() != null) {
-                gc.setDescription(req.getDescription());
+                gc.get().setDescription(req.getDescription());
             }
             if (req.getPrice() != null) {
-                gc.setPrice(req.getPrice());
+                gc.get().setPrice(req.getPrice());
             }
             if (req.getDuration() != null) {
-                gc.setDuration(req.getDuration());
+                gc.get().setDuration(req.getDuration());
             }
             if (req.getTags() != null) {
-                gc.setTags(req.getTags());
+                gc.get().setTags(req.getTags());
             }
 
-            GiftCertificateDTO updatedGc = gcService.updateGiftCertificate(gc);
+            GiftCertificateDTO updatedGc = gcService.updateGiftCertificate(gc.get());
             addLinkToResource(updatedGc);
 
             return ResponseEntity.ok(updatedGc);
@@ -157,7 +161,7 @@ public class GiftCertificateController {
             String errorMsg = String.format("Resource not found (id = %s)", id);
             logger.error(errorMsg);
 
-            return ResponseEntity.status(404).body(Map.of("errorMessage", errorMsg, "errorCode", "404" + resourceCode));
+            return ResponseEntity.status(404).body(Map.of(ERROR_MESSAGE_KEY, errorMsg, ERROR_CODE_KEY, "404" + RESOURCE_CODE));
         }
     }
 
@@ -166,8 +170,8 @@ public class GiftCertificateController {
 
         if (!gcService.deleteGiftCertificate(id)) {
             return ResponseEntity.status(404)
-                    .body(Map.of("errorMessage", String.format("Requested resource not " + "found (id = %s)", id),
-                            "errorCode", "404" + resourceCode));
+                    .body(Map.of(ERROR_MESSAGE_KEY, String.format("Requested resource not " + "found (id = %s)", id),
+                            ERROR_CODE_KEY, "404" + RESOURCE_CODE));
         }
 
         return ResponseEntity.status(204).build();
