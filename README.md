@@ -4,8 +4,7 @@
 * [Featues](#features)
 * [Illustrations](#illustrations)
 ## General info
-This training project was build in [EPAM Java Lab](https://github.com/mjc-school/MJC-School/tree/old/stage%20%233/java). 
-The purpose was to learn building REST API using all aspects of Spring framework, host it on Docker and integrate with CI/CD pipeline.
+The purpose of this training project was to learn building REST API using all aspects of Spring framework, host it on Docker and integrate with CI/CD pipeline.
 ## Technologies
 * Java 17
 * Spring boot 3
